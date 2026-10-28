@@ -9,8 +9,8 @@ option(PYTHON_ENFORCE_TESTS "Enforce Python tests" OFF)
 if(Python3_FOUND)
     report_python_configuration_once()
 
-    if(NOT TARGET pyariadne-function)
-        message(FATAL_ERROR "The Function Python binding target is required to build pyariadne-linear_programming.")
+    if(NOT TARGET pyariadne-algebra)
+        message(FATAL_ERROR "The Algebra Python binding target is required to build pyariadne-linear_programming.")
     endif()
     add_subdirectory(bindings)
 

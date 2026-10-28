@@ -1,4 +1,4 @@
-if(NOT TARGET function)
-    ensure_submodule_initialized(function)
-    add_subdirectory(function)
+if(NOT TARGET algebra)
+    ensure_submodule_initialized(algebra)
+    add_subdirectory(algebra)
 endif()

@@ -21,7 +21,7 @@ The umbrella header is `ariadne-linear-programming.hpp`.
 
 ## Dependencies
 
-- [ariadne-cps/function](https://github.com/ariadne-cps/function), direct submodule dependency. It transitively provides Algebra and Numeric.
+- [ariadne-cps/algebra](https://github.com/ariadne-cps/algebra), direct submodule dependency. It transitively provides Interval and Numeric.
 - [ariadne-cps/configuration](https://github.com/ariadne-cps/configuration), common CMake build infrastructure.
 
 ## Build and test

@@ -20,7 +20,7 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     require_same_dependency_commit(Configuration
         CHAINS
             "configuration"
-            "function|configuration"
+            "algebra|configuration"
     )
 endif()
 
@@ -35,7 +35,7 @@ target_include_directories(linear_programming INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/ariadne-linear-programming>
 )
-target_link_libraries(linear_programming INTERFACE function)
+target_link_libraries(linear_programming INTERFACE algebra)
 
 add_subdirectory(src)
 target_link_libraries(LINEAR_PROGRAMMING_SRC PRIVATE linear_programming)

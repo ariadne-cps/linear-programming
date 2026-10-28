@@ -1,6 +1,6 @@
 #ifndef ARIADNE_PYTHON_LINEAR_PROGRAMMING_UTILITIES_HPP
 #define ARIADNE_PYTHON_LINEAR_PROGRAMMING_UTILITIES_HPP
 
-#include "function-utilities.hpp"
+#include "algebra-utilities.hpp"
 
 #endif

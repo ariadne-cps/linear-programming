@@ -22,13 +22,11 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "function/functional.hpp"
 #include "utility/tuple.hpp"
 #include "utility/stlio.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
-#include "function/affine.hpp"
 #include "linear-programming/linear_simplex_algorithm.hpp"
 
 #include "macro/general.hpp"
