@@ -5,6 +5,17 @@
 using namespace Ariadne;
 using std::cout;
 
+namespace {
+void section(const std::string& title) {
+    cout << "\n== " << title << " ==\n";
+}
+
+template<class T>
+void show(const std::string& label, const T& value) {
+    cout << label << ": " << value << "\n";
+}
+} // namespace
+
 int main() {
     section("Linear programming with the simplex solver");
 
