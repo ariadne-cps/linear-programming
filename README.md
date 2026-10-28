@@ -5,7 +5,7 @@ A standalone C++20 linear-programming component of Ariadne. Provides validated s
 ## Repository layout
 
 - `include/linear-programming/`: public linear-programming headers.
-- `src/`: implementations directly under this directory, without a nested `linear-programming/`.
+- `src/`: implementation files.
 - `tests/`: simplex and linear interior-point regression suites.
 - `python/bindings/`, `python/tests/`, `python/tutorials/`: Python integration and examples.
 - `tutorials/tutorial_linear_programming/`: standalone installed C++ consumer.
@@ -14,10 +14,8 @@ The umbrella header is `ariadne-linear-programming.hpp`.
 
 ## Dependencies
 
-- [ariadne-cps/function](https://github.com/ariadne-cps/function), direct submodule dependency, matching the source solver build. It transitively provides Algebra and Numeric.
+- [ariadne-cps/function](https://github.com/ariadne-cps/function), direct submodule dependency. It transitively provides Algebra and Numeric.
 - [ariadne-cps/configuration](https://github.com/ariadne-cps/configuration), common CMake build infrastructure.
-
-No dependency is introduced on nonlinear programming, constraint solving, equation solving, Set, Paving, or SMT.
 
 ## Build and test
 
@@ -36,10 +34,6 @@ cmake --install build-release --prefix /path/to/install
 ```
 
 C++ tutorial: `tutorials/tutorial_linear_programming/tutorial_linear_programming.cpp`. Python tutorial: `python/tutorials/tutorial_linear_programming.py`.
-
-## Origin
-
-The linear-programming implementation and tests were extracted from `ariadne-cps/solving` (`main`); `linear_program_state.hpp` originated from `ariadne-cps/kernel` (`split`). Behavioral changes to the algorithms were intentionally avoided during extraction.
 
 ## License
 
