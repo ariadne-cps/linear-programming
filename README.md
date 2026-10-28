@@ -4,8 +4,8 @@ A standalone C++20 linear-programming component of Ariadne. Provides validated s
 
 ## Repository layout
 
-- `include/solving/`: public linear-programming headers (preserved for source compatibility).
-- `src/`: implementations directly under this directory, without a nested `solving/`.
+- `include/linear-programming/`: public linear-programming headers.
+- `src/`: implementations directly under this directory, without a nested `linear-programming/`.
 - `tests/`: simplex and linear interior-point regression suites.
 - `python/bindings/`, `python/tests/`, `python/tutorials/`: Python integration and examples.
 - `tutorials/tutorial_linear_programming/`: standalone installed C++ consumer.

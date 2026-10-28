@@ -3,9 +3,9 @@
 
 #include "ariadne-function.hpp"
 
-#include "solving/linear_programming.hpp"
-#include "solving/linear_program_state.hpp"
-#include "solving/linear_simplex_algorithm.hpp"
-#include "solving/linear_interior_point_method.hpp"
+#include "linear-programming/linear_programming.hpp"
+#include "linear-programming/linear_program_state.hpp"
+#include "linear-programming/linear_simplex_algorithm.hpp"
+#include "linear-programming/linear_interior_point_method.hpp"
 
 #endif

@@ -1,7 +1,7 @@
-#ifndef ARIADNE_SOLVING_LINEAR_PROGRAM_STATE_HPP
-#define ARIADNE_SOLVING_LINEAR_PROGRAM_STATE_HPP
+#ifndef ARIADNE_LINEAR_PROGRAMMING_LINEAR_PROGRAM_STATE_HPP
+#define ARIADNE_LINEAR_PROGRAMMING_LINEAR_PROGRAM_STATE_HPP
 
-#include "solving/linear_simplex_algorithm.hpp"
+#include "linear-programming/linear_simplex_algorithm.hpp"
 #include "utility/array.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"

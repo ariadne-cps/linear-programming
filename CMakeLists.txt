@@ -42,7 +42,7 @@ target_link_libraries(LINEAR_PROGRAMMING_SRC PRIVATE linear_programming)
 
 ariadne_register_public_headers(
     TARGET linear_programming
-    DIRECTORIES "${PROJECT_SOURCE_DIR}/include/solving"
+    DIRECTORIES "${PROJECT_SOURCE_DIR}/include/linear-programming"
     FILES "${PROJECT_SOURCE_DIR}/include/ariadne-linear-programming.hpp"
 )
 

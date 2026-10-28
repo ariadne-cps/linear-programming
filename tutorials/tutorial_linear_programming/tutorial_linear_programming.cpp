@@ -40,5 +40,16 @@ int main() {
     show("LP feasible", lp_feasible);
     show("LP solution", lp_solution);
 
+    section("Linear programming with the interior-point method");
+    // Same bounded linear program, using a primal-dual interior-point algorithm.
+    LinearInteriorPointSolver interior_point;
+    auto interior_result = interior_point.minimise(
+        objective, lower, upper, equality_matrix, equality_rhs);
+    show("Interior-point objective", std::get<0>(interior_result));
+    show("Interior-point primal vector", std::get<1>(interior_result));
+    show("Interior-point dual vector", std::get<2>(interior_result));
+    show("Interior-point feasibility",
+        interior_point.feasible(lower,upper,equality_matrix,equality_rhs));
+
     return 0;
 }

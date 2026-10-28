@@ -26,8 +26,8 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
-#include "solving/linear_simplex_algorithm.hpp"
-#include "solving/linear_programming.hpp"
+#include "linear-programming/linear_simplex_algorithm.hpp"
+#include "linear-programming/linear_programming.hpp"
 #include "logging/logging_command_line_interface.hpp"
 
 using namespace Ariadne;

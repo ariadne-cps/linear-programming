@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solving/linear_simplex_algorithm.hpp
+ *            linear-programming/linear_simplex_algorithm.hpp
  *
  *  Copyright  2005-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file solving/linear_simplex_algorithm.hpp
+/*! \file linear-programming/linear_simplex_algorithm.hpp
  *  \brief Simplex algorithms for linear programming.
  */
 
@@ -34,7 +34,7 @@
 #include "utility/tuple.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
-#include "solving/linear_programming.hpp"
+#include "linear-programming/linear_programming.hpp"
 
 namespace Ariadne {
 

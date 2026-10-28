@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solving/linear_simplex_algorithm.cpp
+ *            linear-programming/linear_simplex_algorithm.cpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -29,7 +29,7 @@
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "function/affine.hpp"
-#include "solving/linear_simplex_algorithm.hpp"
+#include "linear-programming/linear_simplex_algorithm.hpp"
 
 #include "macro/general.hpp"
 #include "logging/logging.hpp"

@@ -30,7 +30,7 @@
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
-#include "solving/linear_interior_point_method.hpp"
+#include "linear-programming/linear_interior_point_method.hpp"
 #include "logging/logging_command_line_interface.hpp"
 #include "logging/logging.hpp"
 

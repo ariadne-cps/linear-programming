@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solving/linear_programming.hpp
+ *            linear-programming/linear_programming.hpp
  *
  *  Copyright  2005-20  Alberto Casagrande, Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file solving/linear_programming.hpp
+/*! \file linear-programming/linear_programming.hpp
  *  \brief Common definitions for linear programming.
  */
 

@@ -10,7 +10,7 @@ def tutorial_linear_programming():
     A = FloatDPMatrix([[1, 1]], dp)
     b = FloatDPVector([1], dp)
     print("LP feasible:", simplex.feasible(lower, upper, A, b))
-    print("LP solution:", simplex.minimise(objective, lower, upper, A, b))
+    print("LP solution:", simplex.minimise(objective, lower, upper, A, b))\n    interior = LinearInteriorPointSolver()\n    print("Interior-point solution:", interior.minimise(objective, lower, upper, A, b))\n    print("Interior-point feasibility:", interior.feasible(lower, upper, A, b))
 
 if __name__ == "__main__":
     tutorial_linear_programming()

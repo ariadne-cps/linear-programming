@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solving/linear_interior_point_method.hpp
+ *            linear-programming/linear_interior_point_method.hpp
  *
  *  Copyright  2008-20  Pieter Collins
  *
@@ -22,7 +22,7 @@
  *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file solving/linear_interior_point_method.hpp
+/*! \file linear-programming/linear_interior_point_method.hpp
  *  \brief Interior-point algorithms for linear programming.
  */
 
@@ -33,7 +33,7 @@
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
 #include "utility/tuple.hpp"
-#include "solving/linear_programming.hpp"
+#include "linear-programming/linear_programming.hpp"
 
 namespace Ariadne {
 

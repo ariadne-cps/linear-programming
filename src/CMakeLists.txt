@@ -4,5 +4,5 @@ add_library(LINEAR_PROGRAMMING_SRC OBJECT
 )
 
 target_include_directories(LINEAR_PROGRAMMING_SRC PRIVATE
-    "${PROJECT_SOURCE_DIR}/include/solving"
+    "${PROJECT_SOURCE_DIR}/include/linear-programming"
 )
