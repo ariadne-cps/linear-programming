@@ -819,8 +819,8 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 0u);
-        ARIADNE_TESTING_EXPECT_EQUAL(primal[0], X(0.0_x,dp));
-        ARIADNE_TESTING_EXPECT_EQUAL(primal[1], X(1.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(primal[0], X(0.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(primal[1], X(1.0_x,dp));
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
             lower,upper,A,rhs,types,permutation,inverse,primal));
     }
@@ -1527,9 +1527,9 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
                 ARIADNE_TESTING_EXPECT_EQUAL(types[0], (from_upper ? Slackness::UPPER : Slackness::LOWER));
                 ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
                 ARIADNE_TESTING_EXPECT_EQUAL(types[2], Slackness::BASIS);
-                ARIADNE_TESTING_EXPECT_EQUAL(primal[0], X(from_upper ? 2.0_x : 0.0_x,dp));
-                ARIADNE_TESTING_EXPECT_EQUAL(primal[1], primal[0]);
-                ARIADNE_TESTING_EXPECT_EQUAL(primal[2], X(from_upper ? 3.0_x : 1.0_x,dp));
+                ARIADNE_TESTING_EXPECT_SAME(primal[0], X(from_upper ? 2.0_x : 0.0_x,dp));
+                ARIADNE_TESTING_EXPECT_SAME(primal[1], primal[0]);
+                ARIADNE_TESTING_EXPECT_SAME(primal[2], X(from_upper ? 3.0_x : 1.0_x,dp));
                 ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
                     lower,upper,A,rhs,types,permutation,inverse,primal));
             }

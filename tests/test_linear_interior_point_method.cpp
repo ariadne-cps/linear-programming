@@ -65,10 +65,10 @@ class TestLinearInteriorPointSolver : public Ariadne::Testing::ContextFixture
         LinearProgramStatus status=optimiser->_feasibility_step(
             xl,xu,A,b,x,y,zl,zu);
         ARIADNE_TESTING_EXPECT_EQUAL(status, LinearProgramStatus::PRIMAL_DUAL_FEASIBLE);
-        ARIADNE_TESTING_PROVE(x[0]>FloatDPApproximation(0.0_x,dp));
-        ARIADNE_TESTING_PROVE(x[0]<FloatDPApproximation(0.25_x,dp));
-        ARIADNE_TESTING_PROVE(x[1]>FloatDPApproximation(0.0_x,dp));
-        ARIADNE_TESTING_PROVE(x[1]<FloatDPApproximation(16.0_x,dp));
+        ARIADNE_TESTING_EXPECT_GREATER(x[0].raw(), FloatDP(0.0_x,dp));
+        ARIADNE_TESTING_EXPECT_LESS(x[0].raw(), FloatDP(0.25_x,dp));
+        ARIADNE_TESTING_EXPECT_GREATER(x[1].raw(), FloatDP(0.0_x,dp));
+        ARIADNE_TESTING_EXPECT_LESS(x[1].raw(), FloatDP(16.0_x,dp));
         ARIADNE_TESTING_PROVE(definitely(
             optimiser->validate_feasibility(xl,xu,A,b,x,y)));
 
@@ -96,10 +96,12 @@ class TestLinearInteriorPointSolver : public Ariadne::Testing::ContextFixture
             optimiser->validate_feasibility(lower,upper,A,b,x,y)));
         ARIADNE_TESTING_EXPECT_EQUAL(optimiser->_feasibility_step(
             lower,upper,A,b,x,y,zl,zu), LinearProgramStatus::PRIMAL_FEASIBLE);
-        ARIADNE_TESTING_PROVE(abs(x[0]-FloatDPApproximation(256.0_x,dp))
-                            <FloatDPApproximation(0.015625_x,dp));
-        ARIADNE_TESTING_PROVE(abs(x[1]-FloatDPApproximation(0.25_x,dp))
-                            <FloatDPApproximation(0.0001220703125_x,dp));
+        // These are approximate iterates: compare their computed absolute errors
+        // with the original strict thresholds, without asking Kleenean order.
+        const auto first_coordinate_error=abs(x[0]-FloatDPApproximation(256.0_x,dp));
+        const auto second_coordinate_error=abs(x[1]-FloatDPApproximation(0.25_x,dp));
+        ARIADNE_TESTING_EXPECT_LESS(first_coordinate_error.raw(), FloatDP(0.015625_x,dp));
+        ARIADNE_TESTING_EXPECT_LESS(second_coordinate_error.raw(), FloatDP(0.0001220703125_x,dp));
         ARIADNE_TESTING_PROVE(is_indeterminate(
             optimiser->validate_feasibility(lower,upper,A,b,x,y)));
         ARIADNE_TESTING_PROVE(is_indeterminate(optimiser->feasible(lower,upper,A,b)));
@@ -138,9 +140,9 @@ class TestLinearInteriorPointSolver : public Ariadne::Testing::ContextFixture
         LinearProgramStatus status=optimiser->_minimisation_step(
             c,xl,xu,A,b,x,y,zl,zu);
         ARIADNE_TESTING_EXPECT_EQUAL(status, LinearProgramStatus::PRIMAL_FEASIBLE);
-        ARIADNE_TESTING_EXPECT_EQUAL(x[0], FloatDPApproximation(0.5_x,dp));
-        ARIADNE_TESTING_EXPECT_EQUAL(zl[0], FloatDPApproximation(0.7890625_x,dp));
-        ARIADNE_TESTING_EXPECT_EQUAL(zu[0], FloatDPApproximation(0.2265625_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(x[0], FloatDPApproximation(0.5_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(zl[0], FloatDPApproximation(0.7890625_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(zu[0], FloatDPApproximation(0.2265625_x,dp));
     }
 
     Void test_upper_bound_primal_backtracking() {
@@ -160,10 +162,10 @@ class TestLinearInteriorPointSolver : public Ariadne::Testing::ContextFixture
         LinearProgramStatus status=optimiser->_minimisation_step(
             c,xl,xu,A,b,x,y,zl,zu);
         ARIADNE_TESTING_EXPECT_EQUAL(status, LinearProgramStatus::INDETERMINATE_FEASIBILITY);
-        ARIADNE_TESTING_EXPECT_EQUAL(x[0], FloatDPApproximation(1.75_x,dp));
-        ARIADNE_TESTING_PROVE(x[0]<FloatDPApproximation(2.0_x,dp));
-        ARIADNE_TESTING_PROVE(zl[0]>FloatDPApproximation(0.0_x,dp));
-        ARIADNE_TESTING_PROVE(zu[0]>FloatDPApproximation(0.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(x[0], FloatDPApproximation(1.75_x,dp));
+        ARIADNE_TESTING_EXPECT_LESS(x[0].raw(), FloatDP(2.0_x,dp));
+        ARIADNE_TESTING_EXPECT_GREATER(zl[0].raw(), FloatDP(0.0_x,dp));
+        ARIADNE_TESTING_EXPECT_GREATER(zu[0].raw(), FloatDP(0.0_x,dp));
     }
 
     Void test_primal_backtracking_cutoff() {
@@ -182,10 +184,10 @@ class TestLinearInteriorPointSolver : public Ariadne::Testing::ContextFixture
 
         ARIADNE_TESTING_EXPECT_EQUAL(optimiser->_minimisation_step(
             c,xl,xu,A,b,x,y,zl,zu), LinearProgramStatus::DEGENERATE_FEASIBILITY);
-        ARIADNE_TESTING_EXPECT_EQUAL(x[0], FloatDPApproximation(1.0_x,dp));
-        ARIADNE_TESTING_EXPECT_EQUAL(y[0], FloatDPApproximation(0.0_x,dp));
-        ARIADNE_TESTING_EXPECT_EQUAL(zl[0], FloatDPApproximation(1.0_x,dp));
-        ARIADNE_TESTING_EXPECT_EQUAL(zu[0], FloatDPApproximation(1.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(x[0], FloatDPApproximation(1.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(y[0], FloatDPApproximation(0.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(zl[0], FloatDPApproximation(1.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(zu[0], FloatDPApproximation(1.0_x,dp));
     }
 
     Void test_preconditions() {
@@ -305,7 +307,7 @@ class TestLinearInteriorPointSolver : public Ariadne::Testing::ContextFixture
 
         auto hotstart_result=optimiser->hotstarted_minimise(
             c,xl,xu,A,b,x,y,zl,zu);
-        ARIADNE_TESTING_EXPECT_EQUAL(std::get<0>(hotstart_result), FloatDPApproximation(0.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(std::get<0>(hotstart_result), FloatDPApproximation(0.0_x,dp));
         ARIADNE_TESTING_EXPECT_EQUAL(std::get<1>(hotstart_result).size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(std::get<2>(hotstart_result).size(), 1u);
     }
@@ -405,8 +407,8 @@ class TestLinearInteriorPointSolver : public Ariadne::Testing::ContextFixture
         Vector<FloatDPApproximation> zu({1.0_x},dp);
 
         auto result=optimiser->hotstarted_minimise(c,xl,xu,A,b,x,y,zl,zu);
-        ARIADNE_TESTING_EXPECT_EQUAL(std::get<1>(result)[0], FloatDPApproximation(1e200_pr,dp));
-        ARIADNE_TESTING_EXPECT_EQUAL(std::get<2>(result)[0], FloatDPApproximation(0.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(std::get<1>(result)[0], FloatDPApproximation(1e200_pr,dp));
+        ARIADNE_TESTING_EXPECT_SAME(std::get<2>(result)[0], FloatDPApproximation(0.0_x,dp));
     }
 
     Void test_mixed_bound_feasibility() {
