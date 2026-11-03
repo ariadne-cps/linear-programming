@@ -29,7 +29,7 @@
 #include "algebra/diagonal_matrix.hpp"
 #include "linear-programming/linear_interior_point_method.hpp"
 
-#include "macro/general.hpp"
+#include "utility/macros.hpp"
 #include "logging/logging.hpp"
 
 

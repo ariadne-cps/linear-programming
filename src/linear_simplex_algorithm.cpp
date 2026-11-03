@@ -29,7 +29,7 @@
 #include "algebra/matrix.hpp"
 #include "linear-programming/linear_simplex_algorithm.hpp"
 
-#include "macro/general.hpp"
+#include "utility/macros.hpp"
 #include "logging/logging.hpp"
 
 
