@@ -481,6 +481,14 @@ class TestLinearInteriorPointSolver : public Ariadne::Testing::ContextFixture
 
 int main(int argc, char** argv)
 {
+    // Run the logging code for coverage without filling CTest output.
+    // Redirect once for the lifetime of this standalone test executable;
+    // muting would skip the LOGGING_PRINTLN formatting branches.
+#ifdef _WIN32
+    Logger::instance().redirect_to_file("NUL");
+#else
+    Logger::instance().redirect_to_file("/dev/null");
+#endif
     ARIADNE_TESTING_SUITE("test_linear_interior_point_method");
     ARIADNE_TESTING_ADD_TEST(TestLinearInteriorPointSolver, test_validate_feasibility);
     ARIADNE_TESTING_ADD_TEST(TestLinearInteriorPointSolver, test_validate_feasibility_singular);

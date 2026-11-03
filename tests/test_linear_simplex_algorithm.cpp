@@ -23,6 +23,7 @@
 
 #include <sstream>
 #include "ariadne-testing.hpp"
+#include "logging/logging.hpp"
 #include "numeric/numeric.hpp"
 #include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
@@ -1950,6 +1951,14 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
 
 int main(int argc, char** argv)
 {
+    // Run the logging code for coverage without filling CTest output.
+    // Redirect once for the lifetime of this standalone test executable;
+    // muting would skip the LOGGING_PRINTLN formatting branches.
+#ifdef _WIN32
+    Logger::instance().redirect_to_file("NUL");
+#else
+    Logger::instance().redirect_to_file("/dev/null");
+#endif
     ARIADNE_TESTING_SUITE("test_linear_simplex_algorithm");
     ARIADNE_TESTING_ADD_TEST(TestLinearSimplexSolver, test_linear_programming_exception_contracts);
     ARIADNE_TESTING_ADD_TEST(TestLinearSimplexSolver, test_logging_diagnostics);
