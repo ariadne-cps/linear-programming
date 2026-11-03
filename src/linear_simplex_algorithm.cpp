@@ -1210,10 +1210,8 @@ LinearSimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, cons
 
         ++steps;
         if(steps>=MAX_STEPS) {
-            ARIADNE_WARN("WARNING: Maximum number of steps reached in constrained feasibility problem. "
-                             <<"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
-                             <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" ATy="<<(transpose(A)*compute_y(cc,p,B)));
-            throw DegenerateFeasibilityProblemException();
+            throw DegenerateFeasibilityProblemException(
+                "Maximum number of steps reached in constrained feasibility problem.");
         }
     }
 

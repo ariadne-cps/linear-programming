@@ -1071,7 +1071,10 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         Vector<FloatDP> rhs({-1025.0_x},dp);
         Vector<FloatDP> lower(n,zero_value);
         Vector<FloatDP> upper(n,FloatDP(1.0_x,dp));
-        ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.feasible(lower,upper,A,rhs));
+        ARIADNE_TESTING_EXPECT_THROWS_MESSAGE(
+            DegenerateFeasibilityProblemException,
+            solver.feasible(lower,upper,A,rhs),
+            "Maximum number of steps reached");
     }
 
     Void test_optimum_on_last_permitted_iteration() {
