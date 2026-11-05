@@ -1,4 +1,4 @@
-from pyariadne import FloatDPLinearSimplexSolver, LinearInteriorPointSolver, Slackness
+from pyariadne_linearprogramming import FloatDPLinearSimplexSolver, LinearInteriorPointSolver, Slackness
 
 
 def test_solver_exports():

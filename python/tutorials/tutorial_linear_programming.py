@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from pyariadne import *
+from pyariadne_linearprogramming import *
 
 def tutorial_linear_programming():
     dp = DoublePrecision()

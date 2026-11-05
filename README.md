@@ -42,7 +42,3 @@ cmake --install build-release --prefix /path/to/install
 ```
 
 C++ tutorial: `tutorials/tutorial_linear_programming/tutorial_linear_programming.cpp`. Python tutorial: `python/tutorials/tutorial_linear_programming.py`.
-
-## License
-
-GNU General Public License v3.0 (or later where noted in source files).

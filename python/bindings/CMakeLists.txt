@@ -37,5 +37,6 @@ target_link_libraries(pyariadne-linear_programming INTERFACE
 
 ariadne_add_python_module(
     NAME linear_programming
+    MODULE_IMPORT_NAME pyariadne_linearprogramming
     MODULE_SOURCE linear_programming_module.cpp
 )
