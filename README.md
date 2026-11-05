@@ -8,6 +8,7 @@
 [![codecov](https://codecov.io/gh/ariadne-cps/linear-programming/branch/main/graph/badge.svg)](https://codecov.io/gh/ariadne-cps/linear-programming)
 
 A standalone C++20 linear-programming component of Ariadne. Provides validated simplex methods and a linear interior-point solver, with C++ and Python interfaces.
+Although independently maintained and usable, this repository is also part of the [Ariadne repository structure](https://github.com/ariadne-cps/ariadne/blob/main/doc/structure.md).
 
 ## Repository layout
 
@@ -22,7 +23,7 @@ The umbrella header is `ariadne-linear-programming.hpp`.
 ## Dependencies
 
 - [ariadne-cps/algebra](https://github.com/ariadne-cps/algebra), direct submodule dependency. It transitively provides Interval and Numeric.
-- [ariadne-cps/configuration](https://github.com/ariadne-cps/configuration), common CMake build infrastructure.
+- [ariadne-cps/build](https://github.com/ariadne-cps/build), common CMake build infrastructure.
 
 ## Build and test
 
