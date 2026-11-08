@@ -21,8 +21,9 @@ endif()
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
     # Compare direct occurrences; child commits guarantee internal consistency.
+    # Testing is an independent development dependency, not a commit consistency gate.
     require_same_dependency_commit(Build CHAINS
-        "build" "algebra|build" "testing|build")
+        "build" "algebra|build" "logging|build")
 endif()
 
 setup_project()
@@ -36,7 +37,7 @@ target_include_directories(linear_programming INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/ariadne-linear-programming>
 )
-target_link_libraries(linear_programming INTERFACE algebra)
+target_link_libraries(linear_programming INTERFACE algebra logging)
 
 add_subdirectory(src)
 target_link_libraries(LINEAR_PROGRAMMING_SRC PRIVATE linear_programming)
@@ -53,7 +54,7 @@ setup_project_library(
     LINK_LIBRARIES linear_programming
 )
 
-setup_standalone_project_tests(
+setup_standalone_project(
     TARGET ariadne-linear-programming
     TEST_DIRECTORY tests
     TEST_TARGET tests
