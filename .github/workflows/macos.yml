@@ -72,7 +72,7 @@ jobs:
 
       - name: Prepare C++ linear_programming tutorial
         if: matrix.build_type == 'Release'
-        run: cmake -E copy_directory "$GITHUB_WORKSPACE/tutorials/tutorial_linear_programming" "${{ runner.workspace }}/tutorial_linear_programming"
+        run: cmake -E copy_directory "$GITHUB_WORKSPACE/tutorial" "${{ runner.workspace }}/tutorial_linear_programming"
 
       - name: Build and check C++ linear_programming tutorial
         if: matrix.build_type == 'Release'
@@ -90,7 +90,7 @@ jobs:
 
       - name: Check installed Python linear_programming tutorial
         if: matrix.build_type == 'Release'
-        working-directory: ${{ github.workspace }}/python/tutorials
+        working-directory: ${{ github.workspace }}/tutorial
         env:
           PYTHONPATH: ${{ runner.workspace }}/install/lib/python3.13/site-packages
           LD_LIBRARY_PATH: ${{ runner.workspace }}/install/lib

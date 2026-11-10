@@ -15,8 +15,8 @@ Although independently maintained and usable, this repository is also part of th
 - `include/linear-programming/`: public linear-programming headers.
 - `src/`: implementation files.
 - `tests/`: simplex and linear interior-point regression suites.
-- `python/bindings/`, `python/tests/`, `python/tutorials/`: Python integration and examples.
-- `tutorials/tutorial_linear_programming/`: standalone installed C++ consumer.
+- `python/bindings/`, `python/tests/`, `tutorial/`: Python integration and examples.
+- `tutorial/`: standalone installed C++ consumer.
 
 The umbrella header is `ariadne-linear-programming.hpp`.
 
@@ -41,4 +41,4 @@ cmake --build build-release --parallel --target ariadne-linear-programming bindi
 cmake --install build-release --prefix /path/to/install
 ```
 
-C++ tutorial: `tutorials/tutorial_linear_programming/tutorial_linear_programming.cpp`. Python tutorial: `python/tutorials/tutorial_linear_programming.py`.
+C++ tutorial: `tutorial/tutorial_linear_programming.cpp`. Python tutorial: `python/tutorial.py`.

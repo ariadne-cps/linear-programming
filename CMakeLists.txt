@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(LinearProgramming VERSION 1.0)
+project(LinearProgramming VERSION 3.0)
 
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(BUILD_PYTHON_BINDINGS "Build Python bindings" ON)
@@ -19,57 +19,7 @@ if(NOT TARGET ariadne-build)
     include("${CMAKE_CURRENT_SOURCE_DIR}/ss/bui/cmake/ProjectOptions.cmake")
 endif()
 
-if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
-    # Compare direct occurrences; child commits guarantee internal consistency.
-    # Testing is an independent development dependency, not a commit consistency gate.
-    require_same_dependency_commit(Build CHAINS
-        "build" "algebra|build" "logging|build")
-endif()
+require_same_dependency_commit(Build CHAINS
+    "build" "algebra|build" "logging|build")
 
-setup_project()
-
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
-add_subdirectory(ss)
-
-add_library(linear_programming INTERFACE)
-target_include_directories(linear_programming INTERFACE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include/ariadne-linear-programming>
-)
-target_link_libraries(linear_programming INTERFACE algebra logging)
-
-add_subdirectory(src)
-target_link_libraries(LINEAR_PROGRAMMING_SRC PRIVATE linear_programming)
-
-ariadne_register_public_headers(
-    TARGET linear_programming
-    DIRECTORIES "${PROJECT_SOURCE_DIR}/include/linear-programming"
-    FILES "${PROJECT_SOURCE_DIR}/include/ariadne-linear-programming.hpp"
-)
-
-setup_project_library(
-    TARGET ariadne-linear-programming
-    OBJECTS LINEAR_PROGRAMMING_SRC
-    LINK_LIBRARIES linear_programming
-)
-
-setup_standalone_project(
-    TARGET ariadne-linear-programming
-    TEST_DIRECTORY tests
-    TEST_TARGET tests
-    SOURCES
-        "${PROJECT_SOURCE_DIR}/include"
-        "${PROJECT_SOURCE_DIR}/src"
-)
-
-if(BUILD_PYTHON_BINDINGS)
-    add_subdirectory(python)
-endif()
-
-if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
-    ariadne_install_dependency_bundle(
-        TARGET linear_programming
-        DESTINATION include/ariadne-linear-programming
-    )
-endif()
+ariadne_setup_module(linear-programming)
