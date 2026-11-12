@@ -6,24 +6,24 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of Ariadne Linear Programming.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  Ariadne Linear Programming is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  Ariadne Linear Programming is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with Ariadne Linear Programming. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file linear-programming/linear_interior_point_method.hpp
- *  \brief Interior-point algorithms for linear programming.
+/** @file linear-programming/linear_interior_point_method.hpp
+ *  @brief Interior-point methods and numerical feasibility validation.
  */
 
 #ifndef ARIADNE_LINEAR_INTERIOR_POINT_METHOD_HPP
@@ -37,7 +37,9 @@
 
 namespace Ariadne {
 
+/** @brief Classify the primal and dual feasibility achieved by an interior-point iteration. */
 enum class LinearProgramStatus : std::uint8_t { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_FEASIBLE=2, PRIMAL_DUAL_FEASIBLE=3, DEGENERATE_FEASIBILITY=4};
+/** @brief Write the interior-point iteration status. */
 OutputStream& operator<<(OutputStream& os, LinearProgramStatus lps);
 
 //! \ingroup OptimisationSubModule

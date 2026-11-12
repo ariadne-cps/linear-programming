@@ -6,24 +6,24 @@
  ****************************************************************************/
 
 /*
- *  This file is part of Ariadne.
+ *  This file is part of Ariadne Linear Programming.
  *
- *  Ariadne is free software: you can redistribute it and/or modify
+ *  Ariadne Linear Programming is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Ariadne is distributed in the hope that it will be useful,
+ *  Ariadne Linear Programming is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with Ariadne.  If not, see <https://www.gnu.org/licenses/>.
+ *  along with Ariadne Linear Programming. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*! \file linear-programming/linear_simplex_algorithm.hpp
- *  \brief Simplex algorithms for linear programming.
+/** @file linear-programming/linear_simplex_algorithm.hpp
+ *  @brief Simplex optimization and feasibility algorithms.
  */
 
 #ifndef ARIADNE_LINEAR_SIMPLEX_ALGORITHM_HPP
@@ -48,6 +48,7 @@ enum class Slackness : std::int8_t {
     FIXED=+2  //!< <p/>
 };
 
+/** @brief Write a simplex variable's slackness classification. */
 OutputStream& operator<<(OutputStream& os, Slackness t);
 
 //! \ingroup OptimisationSubModule
@@ -165,6 +166,7 @@ class LinearSimplexSolver
     //! Returns the number of basic variables.
     SizeType consistency_check(const Array<Slackness>& vt, const Array<SizeType>& p) const;
   private:
+    /** @brief Solve feasibility using the supplied mutable simplex basis state. */
     ValidatedKleenean _feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                       Array<Slackness>& vt, Array<SizeType>& p, Matrix<XX>& B, Vector<XX>& x) const;
 
