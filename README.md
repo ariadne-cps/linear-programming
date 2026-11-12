@@ -42,4 +42,3 @@ cmake --build build-release --parallel --target ariadne-linear-programming bindi
 cmake --install build-release --prefix /path/to/install
 ```
 
-C++ tutorial: `tutorial/tutorial_linear_programming.cpp`. Python tutorial: `python/tutorial.py`.
