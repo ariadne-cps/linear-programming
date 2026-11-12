@@ -27,28 +27,28 @@
  */
 
 #include <sstream>
-#include "ariadne-testing.hpp"
+
+#include "algebra/matrix.hpp"
+#include "algebra/vector.hpp"
 #include "logging/logging.hpp"
 #include "numeric/numeric.hpp"
-#include "algebra/vector.hpp"
-#include "algebra/matrix.hpp"
-#include "linear-programming/linear_simplex_algorithm.hpp"
+
+#include "ariadne-testing.hpp"
 #include "linear-programming/linear_programming.hpp"
+#include "linear-programming/linear_simplex_algorithm.hpp"
 
 using namespace Ariadne;
 
-class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
-{
+class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture {
   public:
     using ContextFixture::ContextFixture;
-
 
     Void test_logging_diagnostics() {
         // Recheck the same simplex contracts at high verbosity: pivot
         // selection, bound flips, basis exchange and optimal termination
         // must not depend on whether diagnostic streams are enabled.
-        auto& configuration=Logger::instance().configuration();
-        const unsigned int old_verbosity=configuration.verbosity();
+        auto& configuration = Logger::instance().configuration();
+        const unsigned int old_verbosity = configuration.verbosity();
         struct RestoreVerbosity {
             unsigned int value;
             ~RestoreVerbosity() {
@@ -80,59 +80,62 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // valid basis, so each malformed input below violates exactly one
         // documented dimension or basis invariant.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({0.5_x},dp);
-        Vector<FloatDP> c({1.0_x,2.0_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
-        Vector<FloatDP> short_vector({0.0_x},dp);
-        Vector<FloatDP> long_vector({0.0_x,0.0_x,0.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({0.5_x}, dp);
+        Vector<FloatDP> c({1.0_x, 2.0_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
+        Vector<FloatDP> short_vector({0.0_x}, dp);
+        Vector<FloatDP> long_vector({0.0_x, 0.0_x, 0.0_x}, dp);
 
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.feasible(xl,xu,A,long_vector));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.feasible(short_vector,xu,A,b));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.feasible(xl,short_vector,A,b));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.feasible(xl, xu, A, long_vector));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.feasible(short_vector, xu, A, b));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.feasible(xl, short_vector, A, b));
         Array<Slackness> types(2u);
-        types[0]=Slackness::BASIS;
-        types[1]=Slackness::LOWER;
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_feasible(xl,xu,A,long_vector,types));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_feasible(short_vector,xu,A,b,types));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_feasible(xl,short_vector,A,b,types));
+        types[0] = Slackness::BASIS;
+        types[1] = Slackness::LOWER;
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_feasible(xl, xu, A, long_vector, types));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_feasible(short_vector, xu, A, b, types));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_feasible(xl, short_vector, A, b, types));
 
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.minimise(c,xl,xu,A,long_vector));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.minimise(short_vector,xl,xu,A,b));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.minimise(c,short_vector,xu,A,b));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.minimise(c,xl,short_vector,A,b));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.minimise(c, xl, xu, A, long_vector));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.minimise(short_vector, xl, xu, A, b));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.minimise(c, short_vector, xu, A, b));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.minimise(c, xl, short_vector, A, b));
 
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,xu,A,long_vector,types));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(short_vector,xl,xu,A,b,types));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,short_vector,xu,A,b,types));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,short_vector,A,b,types));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, xu, A, long_vector, types));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(short_vector, xl, xu, A, b, types));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, short_vector, xu, A, b, types));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, short_vector, A, b, types));
         Array<Slackness> wrong_size(1u);
-        wrong_size[0]=Slackness::BASIS;
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,xu,A,b,wrong_size));
+        wrong_size[0] = Slackness::BASIS;
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, xu, A, b, wrong_size));
         Array<Slackness> no_basis(2u);
-        no_basis[0]=Slackness::LOWER;
-        no_basis[1]=Slackness::UPPER;
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,xu,A,b,no_basis));
+        no_basis[0] = Slackness::LOWER;
+        no_basis[1] = Slackness::UPPER;
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, xu, A, b, no_basis));
 
         Array<SizeType> permutation(2u);
-        permutation[0]=0u;
-        permutation[1]=1u;
-        Matrix<FloatDPBounds> inverse=Matrix<FloatDPBounds>::identity(1u,dp);
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,xu,A,long_vector,types,permutation,inverse));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(short_vector,xl,xu,A,b,types,permutation,inverse));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,short_vector,xu,A,b,types,permutation,inverse));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,short_vector,A,b,types,permutation,inverse));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,xu,A,b,wrong_size,permutation,inverse));
+        permutation[0] = 0u;
+        permutation[1] = 1u;
+        Matrix<FloatDPBounds> inverse = Matrix<FloatDPBounds>::identity(1u, dp);
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, xu, A, long_vector, types, permutation, inverse));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(short_vector, xl, xu, A, b, types, permutation, inverse));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, short_vector, xu, A, b, types, permutation, inverse));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, short_vector, A, b, types, permutation, inverse));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, xu, A, b, wrong_size, permutation, inverse));
         Array<SizeType> wrong_permutation(3u);
-        wrong_permutation[0]=0u;
-        wrong_permutation[1]=1u;
-        wrong_permutation[2]=2u;
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,xu,A,b,types,wrong_permutation,inverse));
-        Matrix<FloatDPBounds> wrong_rows(2u,1u,FloatDPBounds(0.0_x,dp));
-        Matrix<FloatDPBounds> wrong_columns(1u,2u,FloatDPBounds(0.0_x,dp));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,xu,A,b,types,permutation,wrong_rows));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c,xl,xu,A,b,types,permutation,wrong_columns));
+        wrong_permutation[0] = 0u;
+        wrong_permutation[1] = 1u;
+        wrong_permutation[2] = 2u;
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, xu, A, b, types, wrong_permutation, inverse));
+        Matrix<FloatDPBounds> wrong_rows(2u, 1u, FloatDPBounds(0.0_x, dp));
+        Matrix<FloatDPBounds> wrong_columns(1u, 2u, FloatDPBounds(0.0_x, dp));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, xu, A, b, types, permutation, wrong_rows));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(c, xl, xu, A, b, types, permutation, wrong_columns));
     }
 
     Void test_linear_programming_exception_contracts() {
@@ -142,7 +145,7 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         ARIADNE_TESTING_EXPECT_EQUAL(std::string(degenerate.what()), std::string(""));
         ARIADNE_TESTING_EXPECT_EQUAL(std::string(unbounded.what()), std::string("unbounded programme"));
         ARIADNE_TESTING_EXPECT_EQUAL(std::string(infeasible.what()), std::string("infeasible programme"));
-        const std::runtime_error& base=infeasible;
+        const std::runtime_error& base = infeasible;
         ARIADNE_TESTING_EXPECT_EQUAL(std::string(base.what()), std::string("infeasible programme"));
     }
 
@@ -163,19 +166,23 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // must exchange the two columns and return the inverse in
         // the resulting basis order.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{0.0_x,2.0_x},{1.0_x,1.0_x}},dp);
+        Matrix<FloatDP> A({
+                              {0.0_x, 2.0_x},
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
 
-        auto basis=solver.compute_basis(A);
-        const auto& p=basis.first;
-        const auto& B=basis.second;
+        auto basis = solver.compute_basis(A);
+        const auto& p = basis.first;
+        const auto& B = basis.second;
         ARIADNE_TESTING_EXPECT_EQUAL(p.size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 0u);
-        ARIADNE_TESTING_PROVE(definitely(B[0][0]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[0][1]==FloatDPBounds(0.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[1][0]==FloatDPBounds(-0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[1][1]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,p,B));
+        ARIADNE_TESTING_PROVE(definitely(B[0][0] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[0][1] == FloatDPBounds(0.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[1][0] == FloatDPBounds(-0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[1][1] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, p, B));
     }
 
     Void test_compute_basis_tall_matrix_precondition() {
@@ -183,7 +190,7 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // The public entry point must reject the dimensions before
         // attempting pivot selection or indexing its permutation.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> tall(2u,1u,FloatDP(1.0_x,dp));
+        Matrix<FloatDP> tall(2u, 1u, FloatDP(1.0_x, dp));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.compute_basis(tall));
     }
 
@@ -191,26 +198,34 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // A unit pivot with no nonzero entries below it must be accepted.
         // The identity matrix needs no column exchange or elimination.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x},{0.0_x,1.0_x}},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x},
+                              {0.0_x, 1.0_x}
+        },
+                          dp);
 
-        auto basis=solver.compute_basis(A);
-        const auto& p=basis.first;
-        const auto& B=basis.second;
+        auto basis = solver.compute_basis(A);
+        const auto& p = basis.first;
+        const auto& B = basis.second;
         ARIADNE_TESTING_EXPECT_EQUAL(p.size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 1u);
-        ARIADNE_TESTING_PROVE(definitely(B[0][0]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[0][1]==FloatDPBounds(0.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[1][0]==FloatDPBounds(0.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[1][1]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,p,B));
+        ARIADNE_TESTING_PROVE(definitely(B[0][0] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[0][1] == FloatDPBounds(0.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[1][0] == FloatDPBounds(0.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[1][1] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, p, B));
     }
 
     Void test_compute_basis_singular_after_elimination() {
         // The rows are linearly dependent, although both are nonzero.
         // The second pivot must detect singularity after elimination.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x},{1.0_x,1.0_x}},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x},
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
         ARIADNE_TESTING_EXPECT_THROWS(SingularLinearProgram, solver.compute_basis(A));
     }
 
@@ -220,16 +235,18 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // strategy must swap the columns instead of accepting the
         // initial order. The permuted basis is invertible (det=5).
         RationalLinearSimplexSolver solver;
-        Matrix<Rational> A({{Rational(1),Rational(3)},
-                            {Rational(2),Rational(1)}});
+        Matrix<Rational> A({
+            {Rational(1), Rational(3)},
+            {Rational(2), Rational(1)}
+        });
 
-        auto basis=solver.compute_basis(A);
-        const auto& permutation=basis.first;
-        const auto& inverse_basis=basis.second;
+        auto basis = solver.compute_basis(A);
+        const auto& permutation = basis.first;
+        const auto& inverse_basis = basis.second;
         ARIADNE_TESTING_EXPECT_EQUAL(permutation.size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 0u);
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,permutation,inverse_basis));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, permutation, inverse_basis));
     }
 
     Void test_compute_basis_rational_nonunit() {
@@ -238,34 +255,40 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // This exercises fraction-preserving elimination separately
         // from the floating-point simplex instantiation.
         RationalLinearSimplexSolver solver;
-        Matrix<Rational> A({{Rational(2),Rational(1)},
-                            {Rational(1),Rational(2)}});
+        Matrix<Rational> A({
+            {Rational(2), Rational(1)},
+            {Rational(1), Rational(2)}
+        });
 
-        auto basis=solver.compute_basis(A);
-        const auto& p=basis.first;
-        const auto& B=basis.second;
+        auto basis = solver.compute_basis(A);
+        const auto& p = basis.first;
+        const auto& B = basis.second;
         ARIADNE_TESTING_EXPECT_EQUAL(p.size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 1u);
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,p,B));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, p, B));
     }
 
     Void test_compute_basis_nonunit_two_by_two() {
         // With no unit column, both pivot stages require elimination.
         // The nonzero upper off-diagonal also requires backsubstitution.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{2.0_x,1.0_x},{1.0_x,2.0_x}},dp);
+        Matrix<FloatDP> A({
+                              {2.0_x, 1.0_x},
+                              {1.0_x, 2.0_x}
+        },
+                          dp);
         Array<SizeType> p(2u);
-        Matrix<FloatDPBounds> B=Matrix<FloatDPBounds>::identity(2u,dp);
+        Matrix<FloatDPBounds> B = Matrix<FloatDPBounds>::identity(2u, dp);
 
-        make_lpair(p,B)=solver.compute_basis(A);
+        make_lpair(p, B) = solver.compute_basis(A);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 1u);
-        ARIADNE_TESTING_PROVE(definitely(B[0][0]>FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[1][1]>FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[0][1]<FloatDPBounds(-0.25_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(B[1][0]<FloatDPBounds(-0.25_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,p,B));
+        ARIADNE_TESTING_PROVE(definitely(B[0][0] > FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[1][1] > FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[0][1] < FloatDPBounds(-0.25_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(B[1][0] < FloatDPBounds(-0.25_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, p, B));
     }
 
     Void test_hotstarted_feasibility_optional_basis() {
@@ -273,44 +296,47 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // variable types are supplied, or reconstruct the permutation
         // from caller-supplied variable types.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({0.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({0.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
 
         Array<Slackness> inferred_vt;
         Array<SizeType> inferred_p;
-        Matrix<FloatDPBounds> inferred_B=Matrix<FloatDPBounds>::identity(1u,dp);
-        Vector<FloatDPBounds> inferred_x({0.0_x,0.0_x},dp);
-        Vector<FloatDPBounds> inferred_y({0.0_x},dp);
+        Matrix<FloatDPBounds> inferred_B = Matrix<FloatDPBounds>::identity(1u, dp);
+        Vector<FloatDPBounds> inferred_x({0.0_x, 0.0_x}, dp);
+        Vector<FloatDPBounds> inferred_y({0.0_x}, dp);
 
         ARIADNE_TESTING_PROVE(definitely(solver.hotstarted_feasible(
-            xl,xu,A,b,inferred_vt,inferred_p,inferred_B,inferred_x,inferred_y)));
+            xl, xu, A, b, inferred_vt, inferred_p, inferred_B, inferred_x, inferred_y)));
         ARIADNE_TESTING_EXPECT_EQUAL(inferred_vt.size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(inferred_vt[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(inferred_vt[1], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(inferred_p.size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(inferred_p[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(inferred_p[1], 1u);
-        ARIADNE_TESTING_PROVE(definitely(inferred_x[0]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(inferred_x[1]==FloatDPBounds(0.0_x,dp)));
+        ARIADNE_TESTING_PROVE(definitely(inferred_x[0] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(inferred_x[1] == FloatDPBounds(0.0_x, dp)));
 
         Array<Slackness> supplied_vt(2u);
-        supplied_vt[0]=Slackness::BASIS;
-        supplied_vt[1]=Slackness::LOWER;
+        supplied_vt[0] = Slackness::BASIS;
+        supplied_vt[1] = Slackness::LOWER;
         Array<SizeType> reconstructed_p;
-        Matrix<FloatDPBounds> reconstructed_B=Matrix<FloatDPBounds>::identity(1u,dp);
-        Vector<FloatDPBounds> reconstructed_x({0.0_x,0.0_x},dp);
-        Vector<FloatDPBounds> reconstructed_y({0.0_x},dp);
+        Matrix<FloatDPBounds> reconstructed_B = Matrix<FloatDPBounds>::identity(1u, dp);
+        Vector<FloatDPBounds> reconstructed_x({0.0_x, 0.0_x}, dp);
+        Vector<FloatDPBounds> reconstructed_y({0.0_x}, dp);
 
         ARIADNE_TESTING_PROVE(definitely(solver.hotstarted_feasible(
-            xl,xu,A,b,supplied_vt,reconstructed_p,reconstructed_B,reconstructed_x,reconstructed_y)));
+            xl, xu, A, b, supplied_vt, reconstructed_p, reconstructed_B, reconstructed_x, reconstructed_y)));
         ARIADNE_TESTING_EXPECT_EQUAL(reconstructed_p.size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(reconstructed_p[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(reconstructed_p[1], 1u);
-        ARIADNE_TESTING_PROVE(definitely(reconstructed_x[0]==inferred_x[0]));
-        ARIADNE_TESTING_PROVE(definitely(reconstructed_x[1]==inferred_x[1]));
-        ARIADNE_TESTING_PROVE(definitely(reconstructed_B[0][0]==inferred_B[0][0]));
+        ARIADNE_TESTING_PROVE(definitely(reconstructed_x[0] == inferred_x[0]));
+        ARIADNE_TESTING_PROVE(definitely(reconstructed_x[1] == inferred_x[1]));
+        ARIADNE_TESTING_PROVE(definitely(reconstructed_B[0][0] == inferred_B[0][0]));
     }
 
     Void test_warm_start_validation_corrects_false_negative() {
@@ -327,24 +353,26 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // the exact solution x=1. A determinate validation must prevail,
         // and the final primal/dual state must use the rebuilt inverse.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x}},dp);
-        Vector<FloatDP> rhs({1.0_x},dp);
-        Vector<FloatDP> lower({0.0_x},dp);
+        Matrix<FloatDP> A({{1.0_x}}, dp);
+        Vector<FloatDP> rhs({1.0_x}, dp);
+        Vector<FloatDP> lower({0.0_x}, dp);
         Vector<FloatDP> upper({actually_feasible
-            ? 1.0000000000004547_pr : 0.9999999999995453_pr},dp);
+                                   ? 1.0000000000004547_pr
+                                   : 0.9999999999995453_pr},
+                              dp);
         Array<Slackness> types({Slackness::BASIS});
         Array<SizeType> p({0u});
-        auto inverse=Matrix<FloatDPBounds>::identity(1u,dp);
-        FloatDPBounds error=FloatDPBounds(1,dp)/FloatDPBounds(1099511627776.0_x,dp);
-        inverse[0][0]=actually_feasible ? FloatDPBounds(1,dp)+error : FloatDPBounds(1,dp)-error;
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,p,inverse));
-        Vector<FloatDPBounds> primal(1u,dp),dual(1u,dp);
-        auto status=solver.hotstarted_feasible(lower,upper,A,rhs,types,p,inverse,primal,dual);
+        auto inverse = Matrix<FloatDPBounds>::identity(1u, dp);
+        FloatDPBounds error = FloatDPBounds(1, dp) / FloatDPBounds(1099511627776.0_x, dp);
+        inverse[0][0] = actually_feasible ? FloatDPBounds(1, dp) + error : FloatDPBounds(1, dp) - error;
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, p, inverse));
+        Vector<FloatDPBounds> primal(1u, dp), dual(1u, dp);
+        auto status = solver.hotstarted_feasible(lower, upper, A, rhs, types, p, inverse, primal, dual);
         ARIADNE_TESTING_PROVE(definitely(actually_feasible ? status : not status));
-        ARIADNE_TESTING_PROVE(definitely(inverse[0][0]==FloatDPBounds(1,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[0]==FloatDPBounds(1,dp)));
-        ARIADNE_TESTING_PROVE(definitely(dual[0]==FloatDPBounds(actually_feasible ? 0 : 1,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,rhs,primal));
+        ARIADNE_TESTING_PROVE(definitely(inverse[0][0] == FloatDPBounds(1, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[0] == FloatDPBounds(1, dp)));
+        ARIADNE_TESTING_PROVE(definitely(dual[0] == FloatDPBounds(actually_feasible ? 0 : 1, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, rhs, primal));
     }
 
     Void test_consistency_check_variable_types() {
@@ -352,36 +380,36 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // in either case the result is the number of basic variables.
         LinearSimplexSolver<FloatDP> solver;
         Array<Slackness> types(3u);
-        types[0]=Slackness::BASIS;
-        types[1]=Slackness::LOWER;
-        types[2]=Slackness::BASIS;
+        types[0] = Slackness::BASIS;
+        types[1] = Slackness::LOWER;
+        types[2] = Slackness::BASIS;
 
         Array<SizeType> basic_only(2u);
-        basic_only[0]=2u;
-        basic_only[1]=0u;
-        ARIADNE_TESTING_EXPECT_EQUAL(solver.consistency_check(types,basic_only), 2u);
+        basic_only[0] = 2u;
+        basic_only[1] = 0u;
+        ARIADNE_TESTING_EXPECT_EQUAL(solver.consistency_check(types, basic_only), 2u);
 
         Array<SizeType> complete(3u);
-        complete[0]=2u;
-        complete[1]=0u;
-        complete[2]=1u;
-        ARIADNE_TESTING_EXPECT_EQUAL(solver.consistency_check(types,complete), 2u);
+        complete[0] = 2u;
+        complete[1] = 0u;
+        complete[2] = 1u;
+        ARIADNE_TESTING_EXPECT_EQUAL(solver.consistency_check(types, complete), 2u);
 
         Array<Slackness> all_basic(2u);
-        all_basic[0]=Slackness::BASIS;
-        all_basic[1]=Slackness::BASIS;
+        all_basic[0] = Slackness::BASIS;
+        all_basic[1] = Slackness::BASIS;
         Array<SizeType> all_basic_order(2u);
-        all_basic_order[0]=1u;
-        all_basic_order[1]=0u;
-        ARIADNE_TESTING_EXPECT_EQUAL(solver.consistency_check(all_basic,all_basic_order), 2u);
+        all_basic_order[0] = 1u;
+        all_basic_order[1] = 0u;
+        ARIADNE_TESTING_EXPECT_EQUAL(solver.consistency_check(all_basic, all_basic_order), 2u);
 
         Array<Slackness> no_basic(2u);
-        no_basic[0]=Slackness::LOWER;
-        no_basic[1]=Slackness::UPPER;
+        no_basic[0] = Slackness::LOWER;
+        no_basic[1] = Slackness::UPPER;
         Array<SizeType> no_basic_order(2u);
-        no_basic_order[0]=1u;
-        no_basic_order[1]=0u;
-        ARIADNE_TESTING_EXPECT_EQUAL(solver.consistency_check(no_basic,no_basic_order), 0u);
+        no_basic_order[0] = 1u;
+        no_basic_order[1] = 0u;
+        ARIADNE_TESTING_EXPECT_EQUAL(solver.consistency_check(no_basic, no_basic_order), 0u);
     }
 
     Void test_consistency_check_nonsquare_system() {
@@ -389,92 +417,101 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // The check must form A*x-b, not A*b-x (the latter has
         // incompatible dimensions in this 1-by-2 example).
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.0_x},dp);
-        Vector<FloatDPBounds> x({0.25_x,0.75_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.0_x}, dp);
+        Vector<FloatDPBounds> x({0.25_x, 0.75_x}, dp);
 
         ARIADNE_TESTING_PROVE(definitely(
-            x[0]+x[1]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,b,x));
+            x[0] + x[1] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, b, x));
     }
 
     Void test_consistency_check_rejects_inconsistent_states() {
         // These public diagnostics accept caller-supplied basis and primal
         // data. Reject each inconsistent component independently.
         LinearSimplexSolver<FloatDP> solver;
-        Array<Slackness> types({Slackness::BASIS,Slackness::LOWER});
-        Array<SizeType> p({0u,1u});
-        Array<SizeType> too_long({0u,1u,0u});
-        Array<SizeType> bad_prefix({2u,1u});
-        Array<SizeType> bad_suffix({0u,2u});
+        Array<Slackness> types({Slackness::BASIS, Slackness::LOWER});
+        Array<SizeType> p({0u, 1u});
+        Array<SizeType> too_long({0u, 1u, 0u});
+        Array<SizeType> bad_prefix({2u, 1u});
+        Array<SizeType> bad_suffix({0u, 2u});
         Array<SizeType> partial_outside({2u});
         Array<SizeType> partial_nonbasic({1u});
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types,too_long));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types,bad_prefix));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types,bad_suffix));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types,partial_outside));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types,partial_nonbasic));
-        Array<Slackness> separated_basis({Slackness::BASIS,Slackness::LOWER,Slackness::BASIS});
-        Array<SizeType> wrong_order({0u,1u,2u});
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(separated_basis,wrong_order));
-        Array<Slackness> one_basis({Slackness::BASIS,Slackness::LOWER,Slackness::LOWER});
-        Array<SizeType> outside_suffix({0u,1u,3u});
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(one_basis,outside_suffix));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types, too_long));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types, bad_prefix));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types, bad_suffix));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types, partial_outside));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(types, partial_nonbasic));
+        Array<Slackness> separated_basis({Slackness::BASIS, Slackness::LOWER, Slackness::BASIS});
+        Array<SizeType> wrong_order({0u, 1u, 2u});
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(separated_basis, wrong_order));
+        Array<Slackness> one_basis({Slackness::BASIS, Slackness::LOWER, Slackness::LOWER});
+        Array<SizeType> outside_suffix({0u, 1u, 3u});
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(one_basis, outside_suffix));
 
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> rhs({0.5_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x},dp);
-        Matrix<FloatDPBounds> inverse({{1.0_x}},dp);
-        Matrix<FloatDPBounds> wrong_inverse({{2.0_x}},dp);
-        Vector<FloatDPBounds> primal({0.5_x,0.0_x},dp);
-        Vector<FloatDPBounds> wrong_bound({0.25_x,0.25_x},dp);
-        Vector<FloatDPBounds> wrong_residual({0.75_x,0.0_x},dp);
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(A,p,wrong_inverse));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(A,rhs,wrong_residual));
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({0.5_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x}, dp);
+        Matrix<FloatDPBounds> inverse({{1.0_x}}, dp);
+        Matrix<FloatDPBounds> wrong_inverse({{2.0_x}}, dp);
+        Vector<FloatDPBounds> primal({0.5_x, 0.0_x}, dp);
+        Vector<FloatDPBounds> wrong_bound({0.25_x, 0.25_x}, dp);
+        Vector<FloatDPBounds> wrong_residual({0.75_x, 0.0_x}, dp);
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(A, p, wrong_inverse));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(A, rhs, wrong_residual));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(
-            lower,upper,A,rhs,types,p,wrong_inverse,primal));
+            lower, upper, A, rhs, types, p, wrong_inverse, primal));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(
-            lower,upper,A,rhs,types,p,inverse,wrong_bound));
+            lower, upper, A, rhs, types, p, inverse, wrong_bound));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(
-            lower,upper,A,rhs,types,p,inverse,wrong_residual));
-        Array<Slackness> invalid_nonbasic({Slackness::BASIS,Slackness::FIXED});
+            lower, upper, A, rhs, types, p, inverse, wrong_residual));
+        Array<Slackness> invalid_nonbasic({Slackness::BASIS, Slackness::FIXED});
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.consistency_check(
-            lower,upper,A,rhs,invalid_nonbasic,p,inverse,primal));
+            lower, upper, A, rhs, invalid_nonbasic, p, inverse, primal));
     }
 
     Void test_point_reconstruction_input_contracts() {
         LinearSimplexSolver<FloatDPApproximation> solver;
-        Matrix<FloatDPApproximation> A({{1.0_x,0.0_x}},dp);
-        Vector<FloatDPApproximation> rhs({0.5_x},dp);
-        Vector<FloatDPApproximation> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDPApproximation> upper({1.0_x,1.0_x},dp);
+        Matrix<FloatDPApproximation> A({
+                                           {1.0_x, 0.0_x}
+        },
+                                       dp);
+        Vector<FloatDPApproximation> rhs({0.5_x}, dp);
+        Vector<FloatDPApproximation> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDPApproximation> upper({1.0_x, 1.0_x}, dp);
         Array<Slackness> incomplete_types({Slackness::BASIS});
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.compute_x(lower,upper,A,rhs,incomplete_types));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.compute_x(lower, upper, A, rhs, incomplete_types));
 
         // A warm-start inverse must reconstruct Ax=b to the stated
         // tolerance. This small relative error in B passes the inverse
         // check, but produces an unacceptable residual for a large rhs.
-        Matrix<FloatDPApproximation> one_variable({{1.0_x}},dp);
-        Vector<FloatDPApproximation> large_rhs({1073741824.0_x},dp);
-        Vector<FloatDPApproximation> large_lower({0.0_x},dp);
-        Vector<FloatDPApproximation> large_upper({2147483648.0_x},dp);
-        Vector<FloatDPApproximation> costs({0.0_x},dp);
+        Matrix<FloatDPApproximation> one_variable({{1.0_x}}, dp);
+        Vector<FloatDPApproximation> large_rhs({1073741824.0_x}, dp);
+        Vector<FloatDPApproximation> large_lower({0.0_x}, dp);
+        Vector<FloatDPApproximation> large_upper({2147483648.0_x}, dp);
+        Vector<FloatDPApproximation> costs({0.0_x}, dp);
         Array<Slackness> types({Slackness::BASIS});
         Array<SizeType> p({0u});
-        Matrix<FloatDPApproximation> inaccurate_inverse({{1.0000000000009094947017729282379150390625_x}},dp);
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(one_variable,p,inaccurate_inverse));
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(costs,large_lower,large_upper,
-            one_variable,large_rhs,types,p,inaccurate_inverse));
+        Matrix<FloatDPApproximation> inaccurate_inverse({{1.0000000000009094947017729282379150390625_x}}, dp);
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(one_variable, p, inaccurate_inverse));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(costs, large_lower, large_upper,
+                                                                    one_variable, large_rhs, types, p, inaccurate_inverse));
 
         // With no equations, a NaN nonbasic bound reaches the point
         // reconstruction check without any invalid indexing or arithmetic.
-        Matrix<FloatDPApproximation> no_equations(0u,1u,FloatDPApproximation(0.0_x,dp));
-        Vector<FloatDPApproximation> no_rhs(0u,dp);
-        Vector<FloatDPApproximation> nan_lower(1u,FloatDPApproximation(FloatDP::nan(dp)));
-        Vector<FloatDPApproximation> finite_upper({1.0_x},dp);
+        Matrix<FloatDPApproximation> no_equations(0u, 1u, FloatDPApproximation(0.0_x, dp));
+        Vector<FloatDPApproximation> no_rhs(0u, dp);
+        Vector<FloatDPApproximation> nan_lower(1u, FloatDPApproximation(FloatDP::nan(dp)));
+        Vector<FloatDPApproximation> finite_upper({1.0_x}, dp);
         Array<Slackness> nonbasic({Slackness::LOWER});
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.compute_x(nan_lower,finite_upper,no_equations,no_rhs,nonbasic));
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.compute_x(nan_lower, finite_upper, no_equations, no_rhs, nonbasic));
     }
 
     Void test_invalid_partial_basis_permutations() {
@@ -483,38 +520,44 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // errors; neither is allowed to reach basis construction.
         LinearSimplexSolver<FloatDP> solver;
 
-        Matrix<FloatDP> A_one({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b_one({1.0_x},dp);
-        Vector<FloatDP> c_one({1.0_x,2.0_x},dp);
-        Vector<FloatDP> lower_one({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper_one({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A_one({
+                                  {1.0_x, 1.0_x}
+        },
+                              dp);
+        Vector<FloatDP> b_one({1.0_x}, dp);
+        Vector<FloatDP> c_one({1.0_x, 2.0_x}, dp);
+        Vector<FloatDP> lower_one({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper_one({1.0_x, 1.0_x}, dp);
         Array<Slackness> types_one(2u);
-        types_one[0]=Slackness::BASIS;
-        types_one[1]=Slackness::LOWER;
+        types_one[0] = Slackness::BASIS;
+        types_one[1] = Slackness::LOWER;
         Array<SizeType> out_of_range(1u);
-        out_of_range[0]=2u; // Valid column indices are 0 and 1.
-        Matrix<FloatDPBounds> inverse_one=Matrix<FloatDPBounds>::identity(1u,dp);
+        out_of_range[0] = 2u; // Valid column indices are 0 and 1.
+        Matrix<FloatDPBounds> inverse_one = Matrix<FloatDPBounds>::identity(1u, dp);
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(
-            c_one,lower_one,upper_one,A_one,b_one,
-            types_one,out_of_range,inverse_one));
+            c_one, lower_one, upper_one, A_one, b_one,
+            types_one, out_of_range, inverse_one));
 
-        Matrix<FloatDP> A_two({{1.0_x,0.0_x,0.0_x},
-                               {0.0_x,1.0_x,0.0_x}},dp);
-        Vector<FloatDP> b_two({0.5_x,0.5_x},dp);
-        Vector<FloatDP> c_two({1.0_x,2.0_x,3.0_x},dp);
-        Vector<FloatDP> lower_two({0.0_x,0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper_two({1.0_x,1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A_two({
+                                  {1.0_x, 0.0_x, 0.0_x},
+                                  {0.0_x, 1.0_x, 0.0_x}
+        },
+                              dp);
+        Vector<FloatDP> b_two({0.5_x, 0.5_x}, dp);
+        Vector<FloatDP> c_two({1.0_x, 2.0_x, 3.0_x}, dp);
+        Vector<FloatDP> lower_two({0.0_x, 0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper_two({1.0_x, 1.0_x, 1.0_x}, dp);
         Array<Slackness> types_two(3u);
-        types_two[0]=Slackness::BASIS;
-        types_two[1]=Slackness::BASIS;
-        types_two[2]=Slackness::LOWER;
+        types_two[0] = Slackness::BASIS;
+        types_two[1] = Slackness::BASIS;
+        types_two[2] = Slackness::LOWER;
         Array<SizeType> duplicate(2u);
-        duplicate[0]=0u;
-        duplicate[1]=0u;
-        Matrix<FloatDPBounds> inverse_two=Matrix<FloatDPBounds>::identity(2u,dp);
+        duplicate[0] = 0u;
+        duplicate[1] = 0u;
+        Matrix<FloatDPBounds> inverse_two = Matrix<FloatDPBounds>::identity(2u, dp);
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.hotstarted_minimise(
-            c_two,lower_two,upper_two,A_two,b_two,
-            types_two,duplicate,inverse_two));
+            c_two, lower_two, upper_two, A_two, b_two,
+            types_two, duplicate, inverse_two));
     }
 
     Void test_hotstarted_minimise_partial_permutation() {
@@ -522,39 +565,42 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // Extending that permutation must preserve the feasible starting
         // basis and yield the same optimum as the complete permutation.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.0_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
-        Vector<FloatDP> c({1.0_x,2.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.0_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
+        Vector<FloatDP> c({1.0_x, 2.0_x}, dp);
 
         Array<Slackness> short_vt(2u);
-        short_vt[0]=Slackness::LOWER;
-        short_vt[1]=Slackness::BASIS;
+        short_vt[0] = Slackness::LOWER;
+        short_vt[1] = Slackness::BASIS;
         Array<SizeType> short_p(1u);
-        short_p[0]=1u;
-        Matrix<FloatDPBounds> short_B=Matrix<FloatDPBounds>::identity(1u,dp);
+        short_p[0] = 1u;
+        Matrix<FloatDPBounds> short_B = Matrix<FloatDPBounds>::identity(1u, dp);
 
-        auto short_optimum=solver.hotstarted_minimise(c,xl,xu,A,b,short_vt,short_p,short_B);
+        auto short_optimum = solver.hotstarted_minimise(c, xl, xu, A, b, short_vt, short_p, short_B);
         ARIADNE_TESTING_EXPECT_EQUAL(short_p.size(), 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(short_p[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(short_p[1], 0u);
-        ARIADNE_TESTING_PROVE(definitely(short_optimum[0]>FloatDPBounds(0.75_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(short_optimum[1]<FloatDPBounds(0.25_x,dp)));
+        ARIADNE_TESTING_PROVE(definitely(short_optimum[0] > FloatDPBounds(0.75_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(short_optimum[1] < FloatDPBounds(0.25_x, dp)));
 
         Array<Slackness> full_vt(2u);
-        full_vt[0]=Slackness::LOWER;
-        full_vt[1]=Slackness::BASIS;
+        full_vt[0] = Slackness::LOWER;
+        full_vt[1] = Slackness::BASIS;
         Array<SizeType> full_p(2u);
-        full_p[0]=1u;
-        full_p[1]=0u;
-        Matrix<FloatDPBounds> full_B=Matrix<FloatDPBounds>::identity(1u,dp);
+        full_p[0] = 1u;
+        full_p[1] = 0u;
+        Matrix<FloatDPBounds> full_B = Matrix<FloatDPBounds>::identity(1u, dp);
 
-        auto full_optimum=solver.hotstarted_minimise(c,xl,xu,A,b,full_vt,full_p,full_B);
+        auto full_optimum = solver.hotstarted_minimise(c, xl, xu, A, b, full_vt, full_p, full_B);
         ARIADNE_TESTING_PROVE(definitely(
-            abs(short_optimum[0]-full_optimum[0])<FloatDPBounds(0.25_x,dp)));
+            abs(short_optimum[0] - full_optimum[0]) < FloatDPBounds(0.25_x, dp)));
         ARIADNE_TESTING_PROVE(definitely(
-            abs(short_optimum[1]-full_optimum[1])<FloatDPBounds(0.25_x,dp)));
+            abs(short_optimum[1] - full_optimum[1]) < FloatDPBounds(0.25_x, dp)));
     }
 
     Void test_hotstarted_optimisation_from_alternate_basis() {
@@ -562,21 +608,24 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // Minimising x0+2*x1 must move to (1,0), even though the
         // supplied basis describes a feasible starting point.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.0_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
-        Vector<FloatDP> c({1.0_x,2.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.0_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
+        Vector<FloatDP> c({1.0_x, 2.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::LOWER;
-        vt[1]=Slackness::BASIS;
+        vt[0] = Slackness::LOWER;
+        vt[1] = Slackness::BASIS;
 
-        auto optimum=solver.hotstarted_minimise(c,xl,xu,A,b,vt);
+        auto optimum = solver.hotstarted_minimise(c, xl, xu, A, b, vt);
         ARIADNE_TESTING_EXPECT_EQUAL(optimum.size(), 2u);
-        ARIADNE_TESTING_PROVE(definitely(optimum[0]>FloatDPBounds(0.75_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(optimum[1]<FloatDPBounds(0.25_x,dp)));
+        ARIADNE_TESTING_PROVE(definitely(optimum[0] > FloatDPBounds(0.75_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(optimum[1] < FloatDPBounds(0.25_x, dp)));
         ARIADNE_TESTING_PROVE(definitely(
-            optimum[0]+optimum[1]==FloatDPBounds(1.0_x,dp)));
+            optimum[0] + optimum[1] == FloatDPBounds(1.0_x, dp)));
     }
 
     Void test_hotstarted_basis_initialisation() {
@@ -584,19 +633,22 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // selected basis, the reconstructed point must be (1/2,0).
         // The same basis must certify the strictly feasible basic x0.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({0.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({0.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::LOWER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::LOWER;
 
-        auto x=solver.compute_x(xl,xu,A,b,vt);
+        auto x = solver.compute_x(xl, xu, A, b, vt);
         ARIADNE_TESTING_EXPECT_EQUAL(x.size(), 2u);
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(solver.hotstarted_feasible(xl,xu,A,b,vt)));
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(solver.hotstarted_feasible(xl, xu, A, b, vt)));
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::LOWER);
     }
@@ -606,41 +658,44 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // reconstruction. The underlying feasible system is A=(1,1),
         // rhs=1/2, with x0 basic and x1 at its lower bound.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> rhs({0.5_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x},dp);
-        Vector<FloatDP> short_bounds({0.0_x},dp);
-        Vector<FloatDP> wrong_rhs({0.5_x,0.5_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({0.5_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x}, dp);
+        Vector<FloatDP> short_bounds({0.0_x}, dp);
+        Vector<FloatDP> wrong_rhs({0.5_x, 0.5_x}, dp);
         Array<Slackness> types(2u);
-        types[0]=Slackness::BASIS;
-        types[1]=Slackness::LOWER;
+        types[0] = Slackness::BASIS;
+        types[1] = Slackness::LOWER;
         Array<Slackness> wrong_types(1u);
-        wrong_types[0]=Slackness::BASIS;
+        wrong_types[0] = Slackness::BASIS;
 
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.verify_feasibility(
-            lower,upper,A,wrong_rhs,types));
+            lower, upper, A, wrong_rhs, types));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.verify_feasibility(
-            short_bounds,upper,A,rhs,types));
+            short_bounds, upper, A, rhs, types));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.verify_feasibility(
-            lower,short_bounds,A,rhs,types));
+            lower, short_bounds, A, rhs, types));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.verify_feasibility(
-            lower,upper,A,rhs,wrong_types));
+            lower, upper, A, rhs, wrong_types));
 
         // Singleton bounds are valid constraints, but the fixed
         // variable cannot be selected as a basic variable.
-        Matrix<FloatDP> one_variable_A({{1.0_x}},dp);
-        Vector<FloatDP> fixed_value({0.0_x},dp);
+        Matrix<FloatDP> one_variable_A({{1.0_x}}, dp);
+        Vector<FloatDP> fixed_value({0.0_x}, dp);
         Array<Slackness> fixed_basic(1u);
-        fixed_basic[0]=Slackness::BASIS;
+        fixed_basic[0] = Slackness::BASIS;
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.verify_feasibility(
-            fixed_value,fixed_value,one_variable_A,fixed_value,fixed_basic));
+            fixed_value, fixed_value, one_variable_A, fixed_value, fixed_basic));
 
         // A singleton is permitted for a nonbasic variable: x1=0
         // leaves the basic x0=1/2 strictly inside its own bounds.
-        Vector<FloatDP> fixed_nonbasic_upper({1.0_x,0.0_x},dp);
+        Vector<FloatDP> fixed_nonbasic_upper({1.0_x, 0.0_x}, dp);
         ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(
-            lower,fixed_nonbasic_upper,A,rhs,types)));
+            lower, fixed_nonbasic_upper, A, rhs, types)));
     }
 
     Void test_verify_feasibility_basic_statuses() {
@@ -648,22 +703,22 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // Points on a bound are indeterminate for strict feasibility;
         // points strictly outside the box are certainly infeasible.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x}},dp);
-        Vector<FloatDP> xl({0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x},dp);
+        Matrix<FloatDP> A({{1.0_x}}, dp);
+        Vector<FloatDP> xl({0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x}, dp);
         Array<Slackness> vt(1u);
-        vt[0]=Slackness::BASIS;
+        vt[0] = Slackness::BASIS;
 
         ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({0.5_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({0.5_x}, dp), vt)));
         ARIADNE_TESTING_PROVE(is_indeterminate(solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({0.0_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({0.0_x}, dp), vt)));
         ARIADNE_TESTING_PROVE(is_indeterminate(solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({1.0_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({1.0_x}, dp), vt)));
         ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({-1.0_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({-1.0_x}, dp), vt)));
         ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({2.0_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({2.0_x}, dp), vt)));
     }
 
     Void test_rational_feasibility_violation_directions() {
@@ -676,15 +731,15 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         Vector<Rational> upper({Rational(1)});
         Array<Slackness> types({Slackness::BASIS});
         Vector<Rational> below({Rational(-1)});
-        Vector<Rational> inside({Rational(1,2)});
+        Vector<Rational> inside({Rational(1, 2)});
         Vector<Rational> above({Rational(2)});
 
         ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(
-            lower,upper,A,below,types)));
+            lower, upper, A, below, types)));
         ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(
-            lower,upper,A,inside,types)));
+            lower, upper, A, inside, types)));
         ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(
-            lower,upper,A,above,types)));
+            lower, upper, A, above, types)));
     }
 
     Void test_verify_feasibility_dual_signs() {
@@ -692,27 +747,30 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // If a basic bound is violated, the reduced-cost sign determines
         // whether the current basis certifies infeasibility or permits a pivot.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> xl({0.0_x,-1.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> xl({0.0_x, -1.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
+        vt[0] = Slackness::BASIS;
 
         // x1 at LOWER: b=-2 implies x0=-1 and no feasible solution.
-        vt[1]=Slackness::LOWER;
+        vt[1] = Slackness::LOWER;
         ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({-2.0_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({-2.0_x}, dp), vt)));
         // x0=2 at this basis, but x1 can increase to make x0 feasible.
         ARIADNE_TESTING_PROVE(is_indeterminate(solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({1.0_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({1.0_x}, dp), vt)));
 
         // x1 at UPPER: b=3 implies x0=2 and no feasible solution.
-        vt[1]=Slackness::UPPER;
+        vt[1] = Slackness::UPPER;
         ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({3.0_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({3.0_x}, dp), vt)));
         // x0=-1 at this basis, but x1 can decrease to make x0 feasible.
         ARIADNE_TESTING_PROVE(is_indeterminate(solver.verify_feasibility(
-            xl,xu,A,Vector<FloatDP>({0.0_x},dp),vt)));
+            xl, xu, A, Vector<FloatDP>({0.0_x}, dp), vt)));
     }
 
     Void test_verify_feasibility_with_narrow_bounds() {
@@ -721,19 +779,23 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // crossing both bounds. That uncertainty must be reported without
         // throwing or claiming a certificate of feasibility/infeasibility.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{3.0_x,2.0_x},{2.0_x,3.0_x}},dp);
-        Vector<FloatDP> rhs({1.0_x,1.0_x},dp);
-        Vector<FloatDP> lower({0.19999999999999998_pr,0.19999999999999998_pr},dp);
-        Vector<FloatDP> upper({0.20000000000000004_pr,0.20000000000000004_pr},dp);
-        Array<Slackness> types({Slackness::BASIS,Slackness::BASIS});
-        Rational exact_solution=Rational(1)/5;
-        ARIADNE_TESTING_PROVE(Rational(lower[0])<exact_solution);
-        ARIADNE_TESTING_PROVE(exact_solution<Rational(upper[0]));
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
-        ARIADNE_TESTING_PROVE(possibly(primal[0]<lower[0]));
-        ARIADNE_TESTING_PROVE(possibly(primal[0]>upper[0]));
+        Matrix<FloatDP> A({
+                              {3.0_x, 2.0_x},
+                              {2.0_x, 3.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({1.0_x, 1.0_x}, dp);
+        Vector<FloatDP> lower({0.19999999999999998_pr, 0.19999999999999998_pr}, dp);
+        Vector<FloatDP> upper({0.20000000000000004_pr, 0.20000000000000004_pr}, dp);
+        Array<Slackness> types({Slackness::BASIS, Slackness::BASIS});
+        Rational exact_solution = Rational(1) / 5;
+        ARIADNE_TESTING_PROVE(Rational(lower[0]) < exact_solution);
+        ARIADNE_TESTING_PROVE(exact_solution < Rational(upper[0]));
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
+        ARIADNE_TESTING_PROVE(possibly(primal[0] < lower[0]));
+        ARIADNE_TESTING_PROVE(possibly(primal[0] > upper[0]));
         ARIADNE_TESTING_PROVE(is_indeterminate(
-            solver.verify_feasibility(lower,upper,A,rhs,types)));
+            solver.verify_feasibility(lower, upper, A, rhs, types)));
     }
 
     Void test_uncertain_feasibility_at_large_bounds() {
@@ -742,34 +804,37 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // Neither endpoint placement warrants an assertion failure or a
         // definite claim when the numerical bounds cannot establish it.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{3.0_x}},dp);
-        Vector<FloatDP> rhs({300000.0_x},dp);
-        Vector<FloatDP> at_bound({100000.0_x},dp);
-        Vector<FloatDP> below({0.0_x},dp);
-        Vector<FloatDP> above({200000.0_x},dp);
-        ARIADNE_TESTING_PROVE(is_indeterminate(solver.feasible(at_bound,above,A,rhs)));
-        ARIADNE_TESTING_PROVE(is_indeterminate(solver.feasible(below,at_bound,A,rhs)));
+        Matrix<FloatDP> A({{3.0_x}}, dp);
+        Vector<FloatDP> rhs({300000.0_x}, dp);
+        Vector<FloatDP> at_bound({100000.0_x}, dp);
+        Vector<FloatDP> below({0.0_x}, dp);
+        Vector<FloatDP> above({200000.0_x}, dp);
+        ARIADNE_TESTING_PROVE(is_indeterminate(solver.feasible(at_bound, above, A, rhs)));
+        ARIADNE_TESTING_PROVE(is_indeterminate(solver.feasible(below, at_bound, A, rhs)));
     }
 
     Void test_uncertain_feasibility_residual() {
         // The near-singular but invertible basis has an exact binary
         // inverse. Applying it to the decimal rhs loses accuracy through
         // cancellation: the residual reaches the strict tolerance.
-        const auto old_rounding=FloatDP::get_rounding_mode();
+        const auto old_rounding = FloatDP::get_rounding_mode();
         struct RestoreRounding {
             decltype(FloatDP::get_rounding_mode()) value;
             ~RestoreRounding() { FloatDP::set_rounding_mode(value); }
         } restore{old_rounding};
         FloatDP::set_rounding_to_nearest();
         LinearSimplexSolver<FloatDPApproximation> solver;
-        Matrix<FloatDPApproximation> A({{1.0_x,1.0_x},
-            {1.0_x,1.0000000000000002220446049250313080847263336181640625_x}},dp);
-        Vector<FloatDPApproximation> rhs({0.0001_pr,0.001_pr},dp);
-        Vector<FloatDPApproximation> lower({-1e14_pr,-1e14_pr},dp);
-        Vector<FloatDPApproximation> upper({1e14_pr,1e14_pr},dp);
-        Array<Slackness> types({Slackness::BASIS,Slackness::BASIS});
+        Matrix<FloatDPApproximation> A({
+                                           {1.0_x,                                                    1.0_x},
+                                           {1.0_x, 1.0000000000000002220446049250313080847263336181640625_x}
+        },
+                                       dp);
+        Vector<FloatDPApproximation> rhs({0.0001_pr, 0.001_pr}, dp);
+        Vector<FloatDPApproximation> lower({-1e14_pr, -1e14_pr}, dp);
+        Vector<FloatDPApproximation> upper({1e14_pr, 1e14_pr}, dp);
+        Array<Slackness> types({Slackness::BASIS, Slackness::BASIS});
         ARIADNE_TESTING_PROVE(is_indeterminate(
-            solver.hotstarted_feasible(lower,upper,A,rhs,types)));
+            solver.hotstarted_feasible(lower, upper, A, rhs, types)));
     }
 
     Void test_approximate_upper_entry_basis_exchange() {
@@ -778,57 +843,64 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // makes the basic variable x0 reach its upper bound at 1, causing
         // x1 to enter the basis. This also exercises a finite leaving ratio.
         LinearSimplexSolver<FloatDPApproximation> solver;
-        Matrix<FloatDPApproximation> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDPApproximation> rhs({1.5_x},dp);
-        Vector<FloatDPApproximation> lower({0.0_x,-inf},dp);
-        Vector<FloatDPApproximation> upper({1.0_x,1.0_x},dp);
+        Matrix<FloatDPApproximation> A({
+                                           {1.0_x, 1.0_x}
+        },
+                                       dp);
+        Vector<FloatDPApproximation> rhs({1.5_x}, dp);
+        Vector<FloatDPApproximation> lower({0.0_x, -inf}, dp);
+        Vector<FloatDPApproximation> upper({1.0_x, 1.0_x}, dp);
 
         Array<Slackness> variable_types(2u);
-        variable_types[0]=Slackness::BASIS;
-        variable_types[1]=Slackness::UPPER;
-        auto basis=solver.compute_basis(A);
-        auto permutation=basis.first;
-        auto inverse_basis=basis.second;
-        auto primal=solver.compute_x(lower,upper,A,rhs,variable_types);
+        variable_types[0] = Slackness::BASIS;
+        variable_types[1] = Slackness::UPPER;
+        auto basis = solver.compute_basis(A);
+        auto permutation = basis.first;
+        auto inverse_basis = basis.second;
+        auto primal = solver.compute_x(lower, upper, A, rhs, variable_types);
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,variable_types,permutation,inverse_basis,primal));
+            lower, upper, A, rhs, variable_types, permutation, inverse_basis, primal));
 
-        SizeType leaving_index=solver.lpstep(
-            lower,upper,A,rhs,variable_types,permutation,inverse_basis,primal,1u);
+        SizeType leaving_index = solver.lpstep(
+            lower, upper, A, rhs, variable_types, permutation, inverse_basis, primal, 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(leaving_index, 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(variable_types[0], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_EQUAL(variable_types[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 0u);
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,variable_types,permutation,inverse_basis,primal));
+            lower, upper, A, rhs, variable_types, permutation, inverse_basis, primal));
     }
 
     Void test_approximate_lower_entry_without_finite_width() {
         // x1 has no upper bound, so its width supplies no initial ratio.
         // Increasing it from zero must select x0's finite lower bound.
-        using X=FloatDPApproximation;
+        using X = FloatDPApproximation;
         LinearSimplexSolver<X> solver;
-        Matrix<X> A({{1.0_x,1.0_x}},dp);
-        Vector<X> rhs({1.0_x},dp);
-        Vector<X> lower({0.0_x,0.0_x},dp);
-        Vector<X> upper({2.0_x,inf},dp);
-        Array<Slackness> types({Slackness::BASIS,Slackness::LOWER});
-        auto basis=solver.compute_basis(A);
-        auto permutation=basis.first;
-        auto inverse=basis.second;
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
+        Matrix<X> A({
+                        {1.0_x, 1.0_x}
+        },
+                    dp);
+        Vector<X> rhs({1.0_x}, dp);
+        Vector<X> lower({0.0_x, 0.0_x}, dp);
+        Vector<X> upper({2.0_x, inf}, dp);
+        Array<Slackness> types({Slackness::BASIS, Slackness::LOWER});
+        auto basis = solver.compute_basis(A);
+        auto permutation = basis.first;
+        auto inverse = basis.second;
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
 
         ARIADNE_TESTING_EXPECT_EQUAL(solver.lpstep(
-            lower,upper,A,rhs,types,permutation,inverse,primal,1u), 0u);
+                                         lower, upper, A, rhs, types, permutation, inverse, primal, 1u),
+                                     0u);
         ARIADNE_TESTING_EXPECT_EQUAL(types[0], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 0u);
-        ARIADNE_TESTING_EXPECT_SAME(primal[0], X(0.0_x,dp));
-        ARIADNE_TESTING_EXPECT_SAME(primal[1], X(1.0_x,dp));
+        ARIADNE_TESTING_EXPECT_SAME(primal[0], X(0.0_x, dp));
+        ARIADNE_TESTING_EXPECT_SAME(primal[1], X(1.0_x, dp));
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,types,permutation,inverse,primal));
+            lower, upper, A, rhs, types, permutation, inverse, primal));
     }
 
     Void test_upper_only_nonbasic_bounds() {
@@ -836,46 +908,52 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // A negative step from that bound enters x1 and makes x0 hit
         // its upper bound, rather than performing an unbounded flip.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,-inf},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, -inf}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
 
-        ARIADNE_TESTING_PROVE(definitely(solver.feasible(xl,xu,A,b)));
-        ARIADNE_TESTING_PROVE(definitely(solver.validated_feasible(xl,xu,A,b)));
+        ARIADNE_TESTING_PROVE(definitely(solver.feasible(xl, xu, A, b)));
+        ARIADNE_TESTING_PROVE(definitely(solver.validated_feasible(xl, xu, A, b)));
 
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::UPPER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::UPPER;
         Array<SizeType> p(2u);
-        p[0]=0u;
-        p[1]=1u;
-        Matrix<FloatDPBounds> B=Matrix<FloatDPBounds>::identity(1u,dp);
-        Vector<FloatDPBounds> x=solver.compute_x(xl,xu,A,b,vt);
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+        p[0] = 0u;
+        p[1] = 1u;
+        Matrix<FloatDPBounds> B = Matrix<FloatDPBounds>::identity(1u, dp);
+        Vector<FloatDPBounds> x = solver.compute_x(xl, xu, A, b, vt);
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
 
-        SizeType r=solver.lpstep(xl,xu,A,b,vt,p,B,x,1u);
+        SizeType r = solver.lpstep(xl, xu, A, b, vt, p, B, x, 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(r, 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 0u);
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
     }
 
     Void test_unbounded_nonbasic_initialisation() {
         // compute_vt cannot choose LOWER or UPPER for a nonbasic
         // variable whose two bounds are both infinite.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x}},dp);
-        Vector<FloatDP> b({0.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,-inf},dp);
-        Vector<FloatDP> xu({1.0_x,+inf},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({0.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, -inf}, dp);
+        Vector<FloatDP> xu({1.0_x, +inf}, dp);
 
-        ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.feasible(xl,xu,A,b));
-        ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.validated_feasible(xl,xu,A,b));
+        ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.feasible(xl, xu, A, b));
+        ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.validated_feasible(xl, xu, A, b));
     }
 
     Void test_approximate_lpstep_without_leaving_variable() {
@@ -885,36 +963,39 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // it is unbounded in the entering direction, no basis pivot
         // or bound flip can occur.
         LinearSimplexSolver<FloatDPApproximation> solver;
-        Matrix<FloatDPApproximation> A({{1.0_x,0.0_x}},dp);
-        Vector<FloatDPApproximation> b({0.5_x},dp);
+        Matrix<FloatDPApproximation> A({
+                                           {1.0_x, 0.0_x}
+        },
+                                       dp);
+        Vector<FloatDPApproximation> b({0.5_x}, dp);
 
-        for(SizeType order=0u; order!=2u; ++order) {
-            Vector<FloatDPApproximation> xl((order==0u)
-                ? Vector<FloatDPApproximation>({0.0_x,0.0_x},dp)
-                : Vector<FloatDPApproximation>({0.0_x,-inf},dp));
-            Vector<FloatDPApproximation> xu((order==0u)
-                ? Vector<FloatDPApproximation>({1.0_x,+inf},dp)
-                : Vector<FloatDPApproximation>({1.0_x,0.0_x},dp));
+        for (SizeType order = 0u; order != 2u; ++order) {
+            Vector<FloatDPApproximation> xl((order == 0u)
+                                                ? Vector<FloatDPApproximation>({0.0_x, 0.0_x}, dp)
+                                                : Vector<FloatDPApproximation>({0.0_x, -inf}, dp));
+            Vector<FloatDPApproximation> xu((order == 0u)
+                                                ? Vector<FloatDPApproximation>({1.0_x, +inf}, dp)
+                                                : Vector<FloatDPApproximation>({1.0_x, 0.0_x}, dp));
             Array<Slackness> variable_types(2u);
-            variable_types[0]=Slackness::BASIS;
-            variable_types[1]=(order==0u ? Slackness::LOWER : Slackness::UPPER);
+            variable_types[0] = Slackness::BASIS;
+            variable_types[1] = (order == 0u ? Slackness::LOWER : Slackness::UPPER);
 
-            auto basis=solver.compute_basis(A);
-            auto permutation=basis.first;
-            auto inverse_basis=basis.second;
-            auto primal=solver.compute_x(xl,xu,A,b,variable_types);
+            auto basis = solver.compute_basis(A);
+            auto permutation = basis.first;
+            auto inverse_basis = basis.second;
+            auto primal = solver.compute_x(xl, xu, A, b, variable_types);
             ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-                xl,xu,A,b,variable_types,permutation,inverse_basis,primal));
+                xl, xu, A, b, variable_types, permutation, inverse_basis, primal));
 
-            SizeType leaving_index=solver.lpstep(
-                xl,xu,A,b,variable_types,permutation,inverse_basis,primal,1u);
+            SizeType leaving_index = solver.lpstep(
+                xl, xu, A, b, variable_types, permutation, inverse_basis, primal, 1u);
             ARIADNE_TESTING_EXPECT_EQUAL(leaving_index, 2u);
             ARIADNE_TESTING_EXPECT_EQUAL(variable_types[0], Slackness::BASIS);
-            ARIADNE_TESTING_EXPECT_EQUAL(variable_types[1], (order==0u ? Slackness::LOWER : Slackness::UPPER));
+            ARIADNE_TESTING_EXPECT_EQUAL(variable_types[1], (order == 0u ? Slackness::LOWER : Slackness::UPPER));
             ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 0u);
             ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 1u);
             ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-                xl,xu,A,b,variable_types,permutation,inverse_basis,primal));
+                xl, xu, A, b, variable_types, permutation, inverse_basis, primal));
         }
     }
 
@@ -922,39 +1003,42 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // lpstep(..., s) is a public overload: s must index a nonbasic
         // variable in p. In particular, n is a sentinel, not an index.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> rhs({0.5_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({0.5_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x}, dp);
         Array<Slackness> statuses(2u);
-        statuses[0]=Slackness::BASIS;
-        statuses[1]=Slackness::LOWER;
+        statuses[0] = Slackness::BASIS;
+        statuses[1] = Slackness::LOWER;
         Array<SizeType> permutation(2u);
-        permutation[0]=0u;
-        permutation[1]=1u;
-        Matrix<FloatDPBounds> inverse_basis=Matrix<FloatDPBounds>::identity(1u,dp);
-        auto primal=solver.compute_x(lower,upper,A,rhs,statuses);
+        permutation[0] = 0u;
+        permutation[1] = 1u;
+        Matrix<FloatDPBounds> inverse_basis = Matrix<FloatDPBounds>::identity(1u, dp);
+        auto primal = solver.compute_x(lower, upper, A, rhs, statuses);
 
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,statuses,permutation,inverse_basis,primal));
+            lower, upper, A, rhs, statuses, permutation, inverse_basis, primal));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.lpstep(
-            lower,upper,A,rhs,statuses,permutation,inverse_basis,primal,2u));
+            lower, upper, A, rhs, statuses, permutation, inverse_basis, primal, 2u));
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.lpstep(
-            lower,upper,A,rhs,statuses,permutation,inverse_basis,primal,0u));
-        Array<Slackness> wrong_types=statuses;
-        wrong_types[1]=Slackness::BASIS;
+            lower, upper, A, rhs, statuses, permutation, inverse_basis, primal, 0u));
+        Array<Slackness> wrong_types = statuses;
+        wrong_types[1] = Slackness::BASIS;
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.lpstep(
-            lower,upper,A,rhs,wrong_types,permutation,inverse_basis,primal,1u));
-        Vector<FloatDPBounds> short_primal({0.5_x},dp);
+            lower, upper, A, rhs, wrong_types, permutation, inverse_basis, primal, 1u));
+        Vector<FloatDPBounds> short_primal({0.5_x}, dp);
         ARIADNE_TESTING_EXPECT_EXCEPTION(solver.lpstep(
-            lower,upper,A,rhs,statuses,permutation,inverse_basis,short_primal,1u));
+            lower, upper, A, rhs, statuses, permutation, inverse_basis, short_primal, 1u));
         // Rejection must leave the valid starting basis intact.
         ARIADNE_TESTING_EXPECT_EQUAL(statuses[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(statuses[1], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 1u);
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,statuses,permutation,inverse_basis,primal));
+            lower, upper, A, rhs, statuses, permutation, inverse_basis, primal));
     }
 
     Void test_lpstep_without_leaving_variable() {
@@ -962,37 +1046,40 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // from its current bound. No basic variable can leave.
         // Cover both positive (LOWER) and negative (UPPER) entering steps.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x}},dp);
-        Vector<FloatDP> b({0.5_x},dp);
-        for(SizeType order=0u; order!=2u; ++order) {
-            Vector<FloatDP> xl((order==0u)
-                ? Vector<FloatDP>({0.0_x,0.0_x},dp)
-                : Vector<FloatDP>({0.0_x,-inf},dp));
-            Vector<FloatDP> xu((order==0u)
-                ? Vector<FloatDP>({1.0_x,+inf},dp)
-                : Vector<FloatDP>({1.0_x,0.0_x},dp));
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({0.5_x}, dp);
+        for (SizeType order = 0u; order != 2u; ++order) {
+            Vector<FloatDP> xl((order == 0u)
+                                   ? Vector<FloatDP>({0.0_x, 0.0_x}, dp)
+                                   : Vector<FloatDP>({0.0_x, -inf}, dp));
+            Vector<FloatDP> xu((order == 0u)
+                                   ? Vector<FloatDP>({1.0_x, +inf}, dp)
+                                   : Vector<FloatDP>({1.0_x, 0.0_x}, dp));
             Array<Slackness> vt(2u);
-            vt[0]=Slackness::BASIS;
-            vt[1]=(order==0u ? Slackness::LOWER : Slackness::UPPER);
+            vt[0] = Slackness::BASIS;
+            vt[1] = (order == 0u ? Slackness::LOWER : Slackness::UPPER);
             Array<SizeType> p(2u);
-            p[0]=0u;
-            p[1]=1u;
-            Matrix<FloatDPBounds> B=Matrix<FloatDPBounds>::identity(1u,dp);
-            Vector<FloatDPBounds> x=solver.compute_x(xl,xu,A,b,vt);
+            p[0] = 0u;
+            p[1] = 1u;
+            Matrix<FloatDPBounds> B = Matrix<FloatDPBounds>::identity(1u, dp);
+            Vector<FloatDPBounds> x = solver.compute_x(xl, xu, A, b, vt);
 
-            ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.5_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.0_x,dp)));
-            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+            ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.5_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.0_x, dp)));
+            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
 
-            SizeType r=solver.lpstep(xl,xu,A,b,vt,p,B,x,1u);
+            SizeType r = solver.lpstep(xl, xu, A, b, vt, p, B, x, 1u);
             ARIADNE_TESTING_EXPECT_EQUAL(r, 2u);
             ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::BASIS);
-            ARIADNE_TESTING_EXPECT_EQUAL(vt[1], (order==0u ? Slackness::LOWER : Slackness::UPPER));
+            ARIADNE_TESTING_EXPECT_EQUAL(vt[1], (order == 0u ? Slackness::LOWER : Slackness::UPPER));
             ARIADNE_TESTING_EXPECT_EQUAL(p[0], 0u);
             ARIADNE_TESTING_EXPECT_EQUAL(p[1], 1u);
-            ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.5_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.0_x,dp)));
-            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+            ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.5_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.0_x, dp)));
+            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
         }
     }
 
@@ -1001,16 +1088,16 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // bound, there is no nonbasic variable to enter the basis,
         // so both algorithms must certify infeasibility.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x}},dp);
-        Vector<FloatDP> xl({0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x},dp);
-        Vector<FloatDP> above({2.0_x},dp);
-        Vector<FloatDP> below({-1.0_x},dp);
+        Matrix<FloatDP> A({{1.0_x}}, dp);
+        Vector<FloatDP> xl({0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x}, dp);
+        Vector<FloatDP> above({2.0_x}, dp);
+        Vector<FloatDP> below({-1.0_x}, dp);
 
-        ARIADNE_TESTING_PROVE(definitely(not solver.feasible(xl,xu,A,above)));
-        ARIADNE_TESTING_PROVE(definitely(not solver.validated_feasible(xl,xu,A,above)));
-        ARIADNE_TESTING_PROVE(definitely(not solver.feasible(xl,xu,A,below)));
-        ARIADNE_TESTING_PROVE(definitely(not solver.validated_feasible(xl,xu,A,below)));
+        ARIADNE_TESTING_PROVE(definitely(not solver.feasible(xl, xu, A, above)));
+        ARIADNE_TESTING_PROVE(definitely(not solver.validated_feasible(xl, xu, A, above)));
+        ARIADNE_TESTING_PROVE(definitely(not solver.feasible(xl, xu, A, below)));
+        ARIADNE_TESTING_PROVE(definitely(not solver.validated_feasible(xl, xu, A, below)));
     }
 
     Void test_approximate_infeasible_equality() {
@@ -1019,48 +1106,54 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // separate interval-style validator cannot certify approximate
         // comparisons, so its own result remains indeterminate.
         LinearSimplexSolver<FloatDPApproximation> solver;
-        Matrix<FloatDPApproximation> A({{1.0_x}},dp);
-        Vector<FloatDPApproximation> rhs({-1.0_x},dp);
-        Vector<FloatDPApproximation> lower({0.0_x},dp);
-        Vector<FloatDPApproximation> upper({1.0_x},dp);
+        Matrix<FloatDPApproximation> A({{1.0_x}}, dp);
+        Vector<FloatDPApproximation> rhs({-1.0_x}, dp);
+        Vector<FloatDPApproximation> lower({0.0_x}, dp);
+        Vector<FloatDPApproximation> upper({1.0_x}, dp);
         Array<Slackness> types({Slackness::BASIS});
-        ARIADNE_TESTING_PROVE(definitely(not solver.feasible(lower,upper,A,rhs)));
+        ARIADNE_TESTING_PROVE(definitely(not solver.feasible(lower, upper, A, rhs)));
         ARIADNE_TESTING_PROVE(is_indeterminate(
-            solver.verify_feasibility(lower,upper,A,rhs,types)));
+            solver.verify_feasibility(lower, upper, A, rhs, types)));
     }
 
     Void test_feasibility_rejects_inverted_bounds() {
         // The equation and basis are consistent; only the second
         // variable's lower/upper interval is inverted.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x}},dp);
-        Vector<FloatDP> rhs({0.5_x},dp);
-        Vector<FloatDP> lower({0.0_x,1.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,0.0_x},dp);
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.feasible(lower,upper,A,rhs));
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({0.5_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 1.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 0.0_x}, dp);
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.feasible(lower, upper, A, rhs));
     }
 
     Void test_feasibility_requires_multiple_bound_flips() {
         // The default vertex is (2.5,0,0), outside x0<=1. One bound
         // flip leaves x0=1.5 infeasible; the second gives (0.5,1,1).
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x,1.0_x}},dp);
-        Vector<FloatDP> rhs({2.5_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x,1.0_x},dp);
-        Array<Slackness> types({Slackness::BASIS,Slackness::LOWER,Slackness::LOWER});
-        Array<SizeType> p({0u,1u,2u});
-        auto inverse=Matrix<FloatDPBounds>::identity(1u,dp);
-        Vector<FloatDPBounds> primal(3u,dp),dual(1u,dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({2.5_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x, 1.0_x}, dp);
+        Array<Slackness> types({Slackness::BASIS, Slackness::LOWER, Slackness::LOWER});
+        Array<SizeType> p({0u, 1u, 2u});
+        auto inverse = Matrix<FloatDPBounds>::identity(1u, dp);
+        Vector<FloatDPBounds> primal(3u, dp), dual(1u, dp);
         ARIADNE_TESTING_PROVE(definitely(solver.hotstarted_feasible(
-            lower,upper,A,rhs,types,p,inverse,primal,dual)));
-        ARIADNE_TESTING_PROVE(definitely(primal[0]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[1]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[2]==FloatDPBounds(1.0_x,dp)));
+            lower, upper, A, rhs, types, p, inverse, primal, dual)));
+        ARIADNE_TESTING_PROVE(definitely(primal[0] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[1] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[2] == FloatDPBounds(1.0_x, dp)));
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_EQUAL(types[2], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,types,p,inverse,primal));
+            lower, upper, A, rhs, types, p, inverse, primal));
     }
 
     Void test_feasibility_iteration_budget() {
@@ -1068,26 +1161,28 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // bound flips. The fixed iteration budget must report exhaustion
         // rather than returning a feasibility certificate for x0<0.
         LinearSimplexSolver<FloatDP> solver;
-        const SizeType n=1026u;
-        FloatDP zero_value(0.0_x,dp);
-        Matrix<FloatDP> A(1u,n,zero_value);
-        A[0][0]=1;
-        for(SizeType j=1u; j!=n; ++j) { A[0][j]=-1; }
-        Vector<FloatDP> rhs({-1025.0_x},dp);
-        Vector<FloatDP> lower(n,zero_value);
-        Vector<FloatDP> upper(n,FloatDP(1.0_x,dp));
+        const SizeType n = 1026u;
+        FloatDP zero_value(0.0_x, dp);
+        Matrix<FloatDP> A(1u, n, zero_value);
+        A[0][0] = 1;
+        for (SizeType j = 1u; j != n; ++j) {
+            A[0][j] = -1;
+        }
+        Vector<FloatDP> rhs({-1025.0_x}, dp);
+        Vector<FloatDP> lower(n, zero_value);
+        Vector<FloatDP> upper(n, FloatDP(1.0_x, dp));
         ARIADNE_TESTING_EXPECT_THROWS_MESSAGE(
             DegenerateFeasibilityProblemException,
-            solver.feasible(lower,upper,A,rhs),
+            solver.feasible(lower, upper, A, rhs),
             "Maximum number of steps reached");
     }
 
     Void test_optimum_on_last_permitted_iteration() {
-        check_optimisation_budget(1024u,true);
+        check_optimisation_budget(1024u, true);
     }
 
     Void test_optimisation_iteration_budget() {
-        check_optimisation_budget(1025u,false);
+        check_optimisation_budget(1025u, false);
     }
 
     Void check_optimisation_budget(SizeType n, Bool completes) {
@@ -1096,22 +1191,22 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // to establish optimality. Completion on call 1024 is permitted;
         // a problem requiring another call exhausts the fixed budget.
         LinearSimplexSolver<FloatDP> solver;
-        FloatDP zero_value(0.0_x,dp);
-        Matrix<FloatDP> A(1u,n,zero_value);
-        A[0][0]=1;
-        Vector<FloatDP> rhs({0.5_x},dp);
-        Vector<FloatDP> lower(n,zero_value);
-        Vector<FloatDP> upper(n,FloatDP(1.0_x,dp));
-        Vector<FloatDP> costs(n,FloatDP(-1.0_x,dp));
-        costs[0]=0;
-        if(completes) {
-            auto optimum=solver.minimise(costs,lower,upper,A,rhs);
-            Vector<FloatDPBounds> expected(n,FloatDPBounds(1.0_x,dp));
-            expected[0]=FloatDPBounds(0.5_x,dp);
-            ARIADNE_TESTING_PROVE(definitely(norm(optimum-expected)==FloatDPBounds(0.0_x,dp)));
-            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,rhs,optimum));
+        FloatDP zero_value(0.0_x, dp);
+        Matrix<FloatDP> A(1u, n, zero_value);
+        A[0][0] = 1;
+        Vector<FloatDP> rhs({0.5_x}, dp);
+        Vector<FloatDP> lower(n, zero_value);
+        Vector<FloatDP> upper(n, FloatDP(1.0_x, dp));
+        Vector<FloatDP> costs(n, FloatDP(-1.0_x, dp));
+        costs[0] = 0;
+        if (completes) {
+            auto optimum = solver.minimise(costs, lower, upper, A, rhs);
+            Vector<FloatDPBounds> expected(n, FloatDPBounds(1.0_x, dp));
+            expected[0] = FloatDPBounds(0.5_x, dp);
+            ARIADNE_TESTING_PROVE(definitely(norm(optimum - expected) == FloatDPBounds(0.0_x, dp)));
+            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, rhs, optimum));
         } else {
-            ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.minimise(costs,lower,upper,A,rhs));
+            ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.minimise(costs, lower, upper, A, rhs));
         }
     }
 
@@ -1120,120 +1215,133 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // Decreasing x1 from UPPER to LOWER does not hit a bound on x0.
         // The operation must flip the nonbasic bound without a pivot.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({0.5_x},dp);
-        Vector<FloatDP> xl({-5.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({5.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({0.5_x}, dp);
+        Vector<FloatDP> xl({-5.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({5.0_x, 1.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::UPPER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::UPPER;
         Array<SizeType> p(2u);
-        p[0]=0u;
-        p[1]=1u;
-        Matrix<FloatDPBounds> B=Matrix<FloatDPBounds>::identity(1u,dp);
-        Vector<FloatDPBounds> x=solver.compute_x(xl,xu,A,b,vt);
+        p[0] = 0u;
+        p[1] = 1u;
+        Matrix<FloatDPBounds> B = Matrix<FloatDPBounds>::identity(1u, dp);
+        Vector<FloatDPBounds> x = solver.compute_x(xl, xu, A, b, vt);
 
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(-0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(-0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
 
-        SizeType r=solver.lpstep(xl,xu,A,b,vt,p,B,x,1u);
+        SizeType r = solver.lpstep(xl, xu, A, b, vt, p, B, x, 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(r, 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 1u);
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.0_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.0_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
     }
 
     Void test_lpstep_fixed_nonbasic_variable() {
         // A singleton nonbasic variable has a zero bound-to-bound step.
         // Flipping its label must preserve the point and the basis.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> rhs({0.5_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,0.0_x},dp);
-        Array<Slackness> types({Slackness::BASIS,Slackness::LOWER});
-        Array<SizeType> permutation({0u,1u});
-        auto inverse=Matrix<FloatDPBounds>::identity(1u,dp);
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({0.5_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 0.0_x}, dp);
+        Array<Slackness> types({Slackness::BASIS, Slackness::LOWER});
+        Array<SizeType> permutation({0u, 1u});
+        auto inverse = Matrix<FloatDPBounds>::identity(1u, dp);
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
 
         ARIADNE_TESTING_EXPECT_EQUAL(solver.lpstep(
-            lower,upper,A,rhs,types,permutation,inverse,primal,1u), 1u);
+                                         lower, upper, A, rhs, types, permutation, inverse, primal, 1u),
+                                     1u);
         ARIADNE_TESTING_EXPECT_EQUAL(types[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 1u);
-        ARIADNE_TESTING_PROVE(definitely(inverse[0][0]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[0]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[1]==FloatDPBounds(0.0_x,dp)));
+        ARIADNE_TESTING_PROVE(definitely(inverse[0][0] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[0] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[1] == FloatDPBounds(0.0_x, dp)));
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,types,permutation,inverse,primal));
+            lower, upper, A, rhs, types, permutation, inverse, primal));
     }
 
     Void test_lpstep_upper_entry() {
         // Start with a feasible basis: x0=0.5, x1=1 (UPPER).
         // Decreasing x1 reaches the upper bound of x0 at 1.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,-1.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, -1.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::UPPER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::UPPER;
         Array<SizeType> p(2u);
-        p[0]=0u;
-        p[1]=1u;
-        Matrix<FloatDPBounds> B=Matrix<FloatDPBounds>::identity(1u,dp);
-        Vector<FloatDPBounds> x=solver.compute_x(xl,xu,A,b,vt);
+        p[0] = 0u;
+        p[1] = 1u;
+        Matrix<FloatDPBounds> B = Matrix<FloatDPBounds>::identity(1u, dp);
+        Vector<FloatDPBounds> x = solver.compute_x(xl, xu, A, b, vt);
 
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
 
-        SizeType r=solver.lpstep(xl,xu,A,b,vt,p,B,x,1u);
+        SizeType r = solver.lpstep(xl, xu, A, b, vt, p, B, x, 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(r, 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 0u);
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
     }
 
     Void test_objective_selects_upper_entry() {
         // At (0.5,1), minimising x1 subject to x0+x1=1.5 must
         // select x1 from UPPER using its positive reduced cost.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> rhs({1.5_x},dp);
-        Vector<FloatDP> costs({0.0_x,1.0_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({1.5_x}, dp);
+        Vector<FloatDP> costs({0.0_x, 1.0_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x}, dp);
         Array<Slackness> types(2u);
-        types[0]=Slackness::BASIS;
-        types[1]=Slackness::UPPER;
+        types[0] = Slackness::BASIS;
+        types[1] = Slackness::UPPER;
         Array<SizeType> permutation(2u);
-        permutation[0]=0u;
-        permutation[1]=1u;
-        Matrix<FloatDPBounds> inverse=Matrix<FloatDPBounds>::identity(1u,dp);
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
+        permutation[0] = 0u;
+        permutation[1] = 1u;
+        Matrix<FloatDPBounds> inverse = Matrix<FloatDPBounds>::identity(1u, dp);
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
 
         ARIADNE_TESTING_PROVE(!solver.lpstep(
-            costs,lower,upper,A,rhs,types,permutation,inverse,primal));
+            costs, lower, upper, A, rhs, types, permutation, inverse, primal));
         ARIADNE_TESTING_EXPECT_EQUAL(types[0], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
-        ARIADNE_TESTING_PROVE(definitely(primal[0]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[1]==FloatDPBounds(0.5_x,dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[0] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[1] == FloatDPBounds(0.5_x, dp)));
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,types,permutation,inverse,primal));
+            lower, upper, A, rhs, types, permutation, inverse, primal));
         ARIADNE_TESTING_PROVE(solver.lpstep(
-            costs,lower,upper,A,rhs,types,permutation,inverse,primal));
+            costs, lower, upper, A, rhs, types, permutation, inverse, primal));
     }
 
     Void test_upper_entry_tied_upper_bounds() {
@@ -1242,49 +1350,52 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // UPPER at the same step. Bland's rule must select x0
         // regardless of the current ordering of the basis.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x,1.0_x},
-                           {0.0_x,1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.5_x,1.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x, 1.0_x},
+                              {0.0_x, 1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.5_x, 1.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x, 1.0_x}, dp);
 
-        for(SizeType order=0u; order!=2u; ++order) {
+        for (SizeType order = 0u; order != 2u; ++order) {
             Array<Slackness> vt(3u);
-            vt[0]=Slackness::BASIS;
-            vt[1]=Slackness::BASIS;
-            vt[2]=Slackness::UPPER;
+            vt[0] = Slackness::BASIS;
+            vt[1] = Slackness::BASIS;
+            vt[2] = Slackness::UPPER;
             Array<SizeType> p(3u);
-            Matrix<FloatDPBounds> B=Matrix<FloatDPBounds>::identity(2u,dp);
-            if(order==0u) {
-                p[0]=0u;
-                p[1]=1u;
+            Matrix<FloatDPBounds> B = Matrix<FloatDPBounds>::identity(2u, dp);
+            if (order == 0u) {
+                p[0] = 0u;
+                p[1] = 1u;
             } else {
-                p[0]=1u;
-                p[1]=0u;
-                B[0][0]=FloatDPBounds(0.0_x,dp);
-                B[0][1]=FloatDPBounds(1.0_x,dp);
-                B[1][0]=FloatDPBounds(1.0_x,dp);
-                B[1][1]=FloatDPBounds(0.0_x,dp);
+                p[0] = 1u;
+                p[1] = 0u;
+                B[0][0] = FloatDPBounds(0.0_x, dp);
+                B[0][1] = FloatDPBounds(1.0_x, dp);
+                B[1][0] = FloatDPBounds(1.0_x, dp);
+                B[1][1] = FloatDPBounds(0.0_x, dp);
             }
-            p[2]=2u;
-            Vector<FloatDPBounds> x=solver.compute_x(xl,xu,A,b,vt);
-            ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.5_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.5_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[2]==FloatDPBounds(1.0_x,dp)));
-            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+            p[2] = 2u;
+            Vector<FloatDPBounds> x = solver.compute_x(xl, xu, A, b, vt);
+            ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.5_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.5_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[2] == FloatDPBounds(1.0_x, dp)));
+            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
 
-            SizeType r=solver.lpstep(xl,xu,A,b,vt,p,B,x,2u);
-            ARIADNE_TESTING_EXPECT_EQUAL(r, (order==0u ? 0u : 1u));
+            SizeType r = solver.lpstep(xl, xu, A, b, vt, p, B, x, 2u);
+            ARIADNE_TESTING_EXPECT_EQUAL(r, (order == 0u ? 0u : 1u));
             ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::UPPER);
             ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::BASIS);
             ARIADNE_TESTING_EXPECT_EQUAL(vt[2], Slackness::BASIS);
-            ARIADNE_TESTING_EXPECT_EQUAL(p[0], (order==0u ? 2u : 1u));
-            ARIADNE_TESTING_EXPECT_EQUAL(p[1], (order==0u ? 1u : 2u));
+            ARIADNE_TESTING_EXPECT_EQUAL(p[0], (order == 0u ? 2u : 1u));
+            ARIADNE_TESTING_EXPECT_EQUAL(p[1], (order == 0u ? 1u : 2u));
             ARIADNE_TESTING_EXPECT_EQUAL(p[2], 0u);
-            ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(1.0_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(1.0_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[2]==FloatDPBounds(0.5_x,dp)));
-            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+            ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(1.0_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(1.0_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[2] == FloatDPBounds(0.5_x, dp)));
+            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
         }
     }
 
@@ -1294,37 +1405,40 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // Decreasing x2 first takes x0 to LOWER and exchanges
         // it with x2, leaving a strictly feasible new basis.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x,-1.0_x},
-                           {0.0_x,1.0_x,-1.0_x}},dp);
-        Vector<FloatDP> b({0.5_x,0.75_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x,-5.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x, -1.0_x},
+                              {0.0_x, 1.0_x, -1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({0.5_x, 0.75_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x, -5.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x, 1.0_x}, dp);
         Array<Slackness> vt(3u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::BASIS;
-        vt[2]=Slackness::UPPER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::BASIS;
+        vt[2] = Slackness::UPPER;
         Array<SizeType> p(3u);
-        p[0]=0u;
-        p[1]=1u;
-        p[2]=2u;
+        p[0] = 0u;
+        p[1] = 1u;
+        p[2] = 2u;
 
-        auto initial=solver.compute_x(xl,xu,A,b,vt);
-        ARIADNE_TESTING_PROVE(definitely(initial[0]==FloatDPBounds(1.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(initial[1]==FloatDPBounds(1.75_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(initial[2]==FloatDPBounds(1.0_x,dp)));
-        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl,xu,A,b,vt,p));
+        auto initial = solver.compute_x(xl, xu, A, b, vt);
+        ARIADNE_TESTING_PROVE(definitely(initial[0] == FloatDPBounds(1.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(initial[1] == FloatDPBounds(1.75_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(initial[2] == FloatDPBounds(1.0_x, dp)));
+        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl, xu, A, b, vt, p));
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[2], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[2], 0u);
-        auto x=solver.compute_x(xl,xu,A,b,vt);
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.25_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[2]==FloatDPBounds(-0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl,xu,A,b,vt,p));
-        ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(xl,xu,A,b,vt)));
+        auto x = solver.compute_x(xl, xu, A, b, vt);
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.25_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[2] == FloatDPBounds(-0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl, xu, A, b, vt, p));
+        ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(xl, xu, A, b, vt)));
     }
 
     Void test_zero_step_lower_bound_pivot() {
@@ -1340,26 +1454,29 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // The basis must change without moving the feasible vertex, and
         // its new nonbasic type must describe the bound it already occupies.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,(at_upper ? -1.0_x : 1.0_x)}},dp);
-        Vector<FloatDP> rhs({(at_upper ? 1.0_x : 0.0_x)},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x},dp);
-        Array<Slackness> types({Slackness::BASIS,Slackness::LOWER});
-        Array<SizeType> p({0u,1u});
-        Matrix<FloatDPBounds> inverse=Matrix<FloatDPBounds>::identity(1u,dp);
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
-        const auto initial=primal;
+        Matrix<FloatDP> A({
+                              {1.0_x, (at_upper ? -1.0_x : 1.0_x)}
+        },
+                          dp);
+        Vector<FloatDP> rhs({(at_upper ? 1.0_x : 0.0_x)}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x}, dp);
+        Array<Slackness> types({Slackness::BASIS, Slackness::LOWER});
+        Array<SizeType> p({0u, 1u});
+        Matrix<FloatDPBounds> inverse = Matrix<FloatDPBounds>::identity(1u, dp);
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
+        const auto initial = primal;
 
-        SizeType leaving=solver.lpstep(lower,upper,A,rhs,types,p,inverse,primal,1u);
+        SizeType leaving = solver.lpstep(lower, upper, A, rhs, types, p, inverse, primal, 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(leaving, 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(types[0], (at_upper ? Slackness::UPPER : Slackness::LOWER));
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
-        ARIADNE_TESTING_PROVE(definitely(primal[0]==initial[0]));
-        ARIADNE_TESTING_PROVE(definitely(primal[1]==initial[1]));
+        ARIADNE_TESTING_PROVE(definitely(primal[0] == initial[0]));
+        ARIADNE_TESTING_PROVE(definitely(primal[1] == initial[1]));
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,types,p,inverse,primal));
+            lower, upper, A, rhs, types, p, inverse, primal));
     }
 
     Void test_rounding_at_lower_basic_bound() {
@@ -1376,43 +1493,48 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // basic point must be clamped to its bound within the tolerance,
         // for both signs, while retaining a small equality residual.
         LinearSimplexSolver<FloatDPApproximation> solver;
-        Matrix<FloatDPApproximation> A({{1.0_x,10.0_x}},dp);
-        Vector<FloatDPApproximation> rhs({enters_from_upper ? -3.0_x : 3.0_x},dp);
+        Matrix<FloatDPApproximation> A({
+                                           {1.0_x, 10.0_x}
+        },
+                                       dp);
+        Vector<FloatDPApproximation> rhs({enters_from_upper ? -3.0_x : 3.0_x}, dp);
         Vector<FloatDPApproximation> lower({enters_from_upper ? -10.0_pr : 0.0_pr,
-                                            enters_from_upper ? -0.3_pr : 0.0_pr},dp);
+                                            enters_from_upper ? -0.3_pr : 0.0_pr},
+                                           dp);
         Vector<FloatDPApproximation> upper({enters_from_upper ? 0.0_pr : 10.0_pr,
-                                            enters_from_upper ? 0.0_pr : 0.3_pr},dp);
+                                            enters_from_upper ? 0.0_pr : 0.3_pr},
+                                           dp);
         Array<Slackness> types({Slackness::BASIS,
-            enters_from_upper ? Slackness::UPPER : Slackness::LOWER});
-        auto basis=solver.compute_basis(A);
-        auto p=basis.first;
-        auto inverse=basis.second;
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
+                                enters_from_upper ? Slackness::UPPER : Slackness::LOWER});
+        auto basis = solver.compute_basis(A);
+        auto p = basis.first;
+        auto inverse = basis.second;
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
 
-        ARIADNE_TESTING_EXPECT_EQUAL(solver.lpstep(lower,upper,A,rhs,types,p,inverse,primal,1u), 0u);
+        ARIADNE_TESTING_EXPECT_EQUAL(solver.lpstep(lower, upper, A, rhs, types, p, inverse, primal, 1u), 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(types[0], (enters_from_upper ? Slackness::UPPER : Slackness::LOWER));
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
-        const auto blocking_bound=enters_from_upper ? lower[1] : upper[1];
-        ARIADNE_TESTING_PROVE(decide(primal[1]==blocking_bound));
+        const auto blocking_bound = enters_from_upper ? lower[1] : upper[1];
+        ARIADNE_TESTING_PROVE(decide(primal[1] == blocking_bound));
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,types,p,inverse,primal));
+            lower, upper, A, rhs, types, p, inverse, primal));
     }
 
     Void test_rigorous_warm_start_lower_correction() {
-        check_rigorous_warm_start_reconstruction(true,false);
+        check_rigorous_warm_start_reconstruction(true, false);
     }
 
     Void test_rigorous_warm_start_upper_correction() {
-        check_rigorous_warm_start_reconstruction(false,false);
+        check_rigorous_warm_start_reconstruction(false, false);
     }
 
     Void test_rigorous_warm_start_lower_failure() {
-        check_rigorous_warm_start_reconstruction(true,true);
+        check_rigorous_warm_start_reconstruction(true, true);
     }
 
     Void test_rigorous_warm_start_upper_failure() {
-        check_rigorous_warm_start_reconstruction(false,true);
+        check_rigorous_warm_start_reconstruction(false, true);
     }
 
     Void check_rigorous_warm_start_reconstruction(Bool enters_from_upper, Bool rejects) {
@@ -1421,31 +1543,38 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // a nearby entering bound. Recomputing the inverse then reveals
         // an overshoot: clamp within tolerance, report degeneracy beyond it.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,10.0_x}},dp);
-        Vector<FloatDP> rhs({enters_from_upper ? -3.0_x : 3.0_x},dp);
-        Vector<FloatDP> lower({enters_from_upper ? -10.0_x : 0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({enters_from_upper ? 0.0_x : 10.0_x,0.0_x},dp);
-        FloatDP bound(rejects ? 0.299999999995_pr : 0.2999999999999_pr,dp);
-        if(enters_from_upper) { lower[1]=-bound; } else { upper[1]=bound; }
-        Array<Slackness> types({Slackness::BASIS,
-            enters_from_upper ? Slackness::UPPER : Slackness::LOWER});
-        Array<SizeType> p({0u,1u});
-        auto inverse=Matrix<FloatDPBounds>::identity(1u,dp);
-        // The perturbations are exactly 2^-35 and 2^-40 respectively.
-        inverse[0][0]=FloatDPBounds(1,dp)+FloatDPBounds(1,dp)/
-            FloatDPBounds(rejects ? 34359738368.0_x : 1099511627776.0_x,dp);
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,p,inverse));
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
-        if(rejects) {
-            ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.lpstep(lower,upper,A,rhs,types,p,inverse,primal,1u));
+        Matrix<FloatDP> A({
+                              {1.0_x, 10.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({enters_from_upper ? -3.0_x : 3.0_x}, dp);
+        Vector<FloatDP> lower({enters_from_upper ? -10.0_x : 0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({enters_from_upper ? 0.0_x : 10.0_x, 0.0_x}, dp);
+        FloatDP bound(rejects ? 0.299999999995_pr : 0.2999999999999_pr, dp);
+        if (enters_from_upper) {
+            lower[1] = -bound;
         } else {
-            ARIADNE_TESTING_EXPECT_EQUAL(solver.lpstep(lower,upper,A,rhs,types,p,inverse,primal,1u), 0u);
+            upper[1] = bound;
+        }
+        Array<Slackness> types({Slackness::BASIS,
+                                enters_from_upper ? Slackness::UPPER : Slackness::LOWER});
+        Array<SizeType> p({0u, 1u});
+        auto inverse = Matrix<FloatDPBounds>::identity(1u, dp);
+        // The perturbations are exactly 2^-35 and 2^-40 respectively.
+        inverse[0][0] = FloatDPBounds(1, dp) + FloatDPBounds(1, dp) /
+                                                   FloatDPBounds(rejects ? 34359738368.0_x : 1099511627776.0_x, dp);
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, p, inverse));
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
+        if (rejects) {
+            ARIADNE_TESTING_EXPECT_THROWS(DegenerateFeasibilityProblemException, solver.lpstep(lower, upper, A, rhs, types, p, inverse, primal, 1u));
+        } else {
+            ARIADNE_TESTING_EXPECT_EQUAL(solver.lpstep(lower, upper, A, rhs, types, p, inverse, primal, 1u), 0u);
             ARIADNE_TESTING_EXPECT_EQUAL(p[0], 1u);
             ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
-            FloatDP expected=enters_from_upper ? -bound : bound;
-            ARIADNE_TESTING_PROVE(definitely(primal[1]==FloatDPBounds(expected)));
+            FloatDP expected = enters_from_upper ? -bound : bound;
+            ARIADNE_TESTING_PROVE(definitely(primal[1] == FloatDPBounds(expected)));
             ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-                lower,upper,A,rhs,types,p,inverse,primal));
+                lower, upper, A, rhs, types, p, inverse, primal));
         }
     }
 
@@ -1455,49 +1584,52 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // must be x0 (smaller original index), independently of
         // the order of the basis columns in p.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x,1.0_x},
-                           {0.0_x,1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.0_x,1.0_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({2.0_x,2.0_x,2.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x, 1.0_x},
+                              {0.0_x, 1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.0_x, 1.0_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({2.0_x, 2.0_x, 2.0_x}, dp);
 
-        for(SizeType order=0u; order!=2u; ++order) {
+        for (SizeType order = 0u; order != 2u; ++order) {
             Array<Slackness> vt(3u);
-            vt[0]=Slackness::BASIS;
-            vt[1]=Slackness::BASIS;
-            vt[2]=Slackness::LOWER;
+            vt[0] = Slackness::BASIS;
+            vt[1] = Slackness::BASIS;
+            vt[2] = Slackness::LOWER;
             Array<SizeType> p(3u);
-            Matrix<FloatDPBounds> B=Matrix<FloatDPBounds>::identity(2u,dp);
-            if(order==0u) {
-                p[0]=0u;
-                p[1]=1u;
+            Matrix<FloatDPBounds> B = Matrix<FloatDPBounds>::identity(2u, dp);
+            if (order == 0u) {
+                p[0] = 0u;
+                p[1] = 1u;
             } else {
-                p[0]=1u;
-                p[1]=0u;
-                B[0][0]=FloatDPBounds(0.0_x,dp);
-                B[0][1]=FloatDPBounds(1.0_x,dp);
-                B[1][0]=FloatDPBounds(1.0_x,dp);
-                B[1][1]=FloatDPBounds(0.0_x,dp);
+                p[0] = 1u;
+                p[1] = 0u;
+                B[0][0] = FloatDPBounds(0.0_x, dp);
+                B[0][1] = FloatDPBounds(1.0_x, dp);
+                B[1][0] = FloatDPBounds(1.0_x, dp);
+                B[1][1] = FloatDPBounds(0.0_x, dp);
             }
-            p[2]=2u;
-            Vector<FloatDPBounds> x=solver.compute_x(xl,xu,A,b,vt);
-            ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(1.0_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(1.0_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[2]==FloatDPBounds(0.0_x,dp)));
-            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+            p[2] = 2u;
+            Vector<FloatDPBounds> x = solver.compute_x(xl, xu, A, b, vt);
+            ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(1.0_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(1.0_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[2] == FloatDPBounds(0.0_x, dp)));
+            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
 
-            SizeType r=solver.lpstep(xl,xu,A,b,vt,p,B,x,2u);
-            ARIADNE_TESTING_EXPECT_EQUAL(r, (order==0u ? 0u : 1u));
+            SizeType r = solver.lpstep(xl, xu, A, b, vt, p, B, x, 2u);
+            ARIADNE_TESTING_EXPECT_EQUAL(r, (order == 0u ? 0u : 1u));
             ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::LOWER);
             ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::BASIS);
             ARIADNE_TESTING_EXPECT_EQUAL(vt[2], Slackness::BASIS);
-            ARIADNE_TESTING_EXPECT_EQUAL(p[0], (order==0u ? 2u : 1u));
-            ARIADNE_TESTING_EXPECT_EQUAL(p[1], (order==0u ? 1u : 2u));
+            ARIADNE_TESTING_EXPECT_EQUAL(p[0], (order == 0u ? 2u : 1u));
+            ARIADNE_TESTING_EXPECT_EQUAL(p[1], (order == 0u ? 1u : 2u));
             ARIADNE_TESTING_EXPECT_EQUAL(p[2], 0u);
-            ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.0_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(0.0_x,dp)));
-            ARIADNE_TESTING_PROVE(definitely(x[2]==FloatDPBounds(1.0_x,dp)));
-            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl,xu,A,b,vt,p,B,x));
+            ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.0_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(0.0_x, dp)));
+            ARIADNE_TESTING_PROVE(definitely(x[2] == FloatDPBounds(1.0_x, dp)));
+            ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(xl, xu, A, b, vt, p, B, x));
         }
     }
 
@@ -1505,42 +1637,47 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // The approximate solver uses the generic ratio test. Equal
         // blocking distances must select the smaller original index,
         // for entry from either bound and in either basis ordering.
-        using X=FloatDPApproximation;
+        using X = FloatDPApproximation;
         LinearSimplexSolver<X> solver;
-        Matrix<X> A({{1.0_x,0.0_x,1.0_x},
-                     {0.0_x,1.0_x,1.0_x}},dp);
-        Vector<X> lower({0.0_x,0.0_x,0.0_x},dp);
-        Vector<X> upper({2.0_x,2.0_x,4.0_x},dp);
-        for(bool from_upper : {false,true}) {
-            Vector<X> rhs(2u,X(from_upper ? 5.0_x : 1.0_x,dp));
-            for(bool reversed : {false,true}) {
+        Matrix<X> A({
+                        {1.0_x, 0.0_x, 1.0_x},
+                        {0.0_x, 1.0_x, 1.0_x}
+        },
+                    dp);
+        Vector<X> lower({0.0_x, 0.0_x, 0.0_x}, dp);
+        Vector<X> upper({2.0_x, 2.0_x, 4.0_x}, dp);
+        for (bool from_upper: {false, true}) {
+            Vector<X> rhs(2u, X(from_upper ? 5.0_x : 1.0_x, dp));
+            for (bool reversed: {false, true}) {
                 Array<Slackness> types(3u);
-                types[0]=Slackness::BASIS;
-                types[1]=Slackness::BASIS;
-                types[2]=from_upper ? Slackness::UPPER : Slackness::LOWER;
+                types[0] = Slackness::BASIS;
+                types[1] = Slackness::BASIS;
+                types[2] = from_upper ? Slackness::UPPER : Slackness::LOWER;
                 Array<SizeType> permutation(3u);
-                permutation[0]=reversed ? 1u : 0u;
-                permutation[1]=reversed ? 0u : 1u;
-                permutation[2]=2u;
-                Matrix<X> inverse=Matrix<X>::identity(2u,dp);
-                if(reversed) {
-                    inverse[0][0]=0.0_x; inverse[0][1]=1.0_x;
-                    inverse[1][0]=1.0_x; inverse[1][1]=0.0_x;
+                permutation[0] = reversed ? 1u : 0u;
+                permutation[1] = reversed ? 0u : 1u;
+                permutation[2] = 2u;
+                Matrix<X> inverse = Matrix<X>::identity(2u, dp);
+                if (reversed) {
+                    inverse[0][0] = 0.0_x;
+                    inverse[0][1] = 1.0_x;
+                    inverse[1][0] = 1.0_x;
+                    inverse[1][1] = 0.0_x;
                 }
-                auto primal=solver.compute_x(lower,upper,A,rhs,types);
+                auto primal = solver.compute_x(lower, upper, A, rhs, types);
                 ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-                    lower,upper,A,rhs,types,permutation,inverse,primal));
-                SizeType leaving=solver.lpstep(
-                    lower,upper,A,rhs,types,permutation,inverse,primal,2u);
+                    lower, upper, A, rhs, types, permutation, inverse, primal));
+                SizeType leaving = solver.lpstep(
+                    lower, upper, A, rhs, types, permutation, inverse, primal, 2u);
                 ARIADNE_TESTING_EXPECT_EQUAL(leaving, (reversed ? 1u : 0u));
                 ARIADNE_TESTING_EXPECT_EQUAL(types[0], (from_upper ? Slackness::UPPER : Slackness::LOWER));
                 ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
                 ARIADNE_TESTING_EXPECT_EQUAL(types[2], Slackness::BASIS);
-                ARIADNE_TESTING_EXPECT_SAME(primal[0], X(from_upper ? 2.0_x : 0.0_x,dp));
+                ARIADNE_TESTING_EXPECT_SAME(primal[0], X(from_upper ? 2.0_x : 0.0_x, dp));
                 ARIADNE_TESTING_EXPECT_SAME(primal[1], primal[0]);
-                ARIADNE_TESTING_EXPECT_SAME(primal[2], X(from_upper ? 3.0_x : 1.0_x,dp));
+                ARIADNE_TESTING_EXPECT_SAME(primal[2], X(from_upper ? 3.0_x : 1.0_x, dp));
                 ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-                    lower,upper,A,rhs,types,permutation,inverse,primal));
+                    lower, upper, A, rhs, types, permutation, inverse, primal));
             }
         }
     }
@@ -1550,27 +1687,30 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // bound and nonbasic x1 at UPPER. Moving x1 down to LOWER
         // reaches a strictly feasible basic x0 without a basis change.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,-1.0_x}},dp);
-        Vector<FloatDP> b({1.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,-1.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, -1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, -1.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::UPPER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::UPPER;
         Array<SizeType> p(2u);
-        p[0]=0u;
-        p[1]=1u;
+        p[0] = 0u;
+        p[1] = 1u;
 
-        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl,xu,A,b,vt,p));
+        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl, xu, A, b, vt, p));
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 1u);
-        auto x=solver.compute_x(xl,xu,A,b,vt);
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(-1.0_x,dp)));
-        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl,xu,A,b,vt,p));
-        ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(xl,xu,A,b,vt)));
+        auto x = solver.compute_x(xl, xu, A, b, vt);
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(-1.0_x, dp)));
+        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl, xu, A, b, vt, p));
+        ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(xl, xu, A, b, vt)));
     }
 
     Void test_validated_upper_entry_basis_exchange() {
@@ -1578,27 +1718,30 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // reaches its lower bound. The UPPER entry must exchange
         // x1 into the basis with the resulting point (0,-1.5).
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,-1.0_x}},dp);
-        Vector<FloatDP> b({1.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,-5.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, -1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, -5.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::UPPER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::UPPER;
         Array<SizeType> p(2u);
-        p[0]=0u;
-        p[1]=1u;
+        p[0] = 0u;
+        p[1] = 1u;
 
-        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl,xu,A,b,vt,p));
+        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl, xu, A, b, vt, p));
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 0u);
-        auto x=solver.compute_x(xl,xu,A,b,vt);
-        ARIADNE_TESTING_PROVE(definitely(x[0]==FloatDPBounds(0.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(x[1]==FloatDPBounds(-1.5_x,dp)));
-        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl,xu,A,b,vt,p));
-        ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(xl,xu,A,b,vt)));
+        auto x = solver.compute_x(xl, xu, A, b, vt);
+        ARIADNE_TESTING_PROVE(definitely(x[0] == FloatDPBounds(0.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(x[1] == FloatDPBounds(-1.5_x, dp)));
+        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl, xu, A, b, vt, p));
+        ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(xl, xu, A, b, vt)));
     }
 
     Void test_validated_feasibility_without_finite_leaving_bound() {
@@ -1607,19 +1750,22 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // bound on x0, but both bounds in this direction are infinite.
         // No variable can leave the basis in a finite simplex step.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> rhs({2.0_x},dp);
-        Vector<FloatDP> lower({-inf,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,+inf},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({2.0_x}, dp);
+        Vector<FloatDP> lower({-inf, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, +inf}, dp);
         Array<Slackness> variable_types(2u);
-        variable_types[0]=Slackness::BASIS;
-        variable_types[1]=Slackness::LOWER;
+        variable_types[0] = Slackness::BASIS;
+        variable_types[1] = Slackness::LOWER;
         Array<SizeType> permutation(2u);
-        permutation[0]=0u;
-        permutation[1]=1u;
+        permutation[0] = 0u;
+        permutation[1] = 1u;
 
         ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(
-            lower,upper,A,rhs,variable_types,permutation));
+            lower, upper, A, rhs, variable_types, permutation));
         ARIADNE_TESTING_EXPECT_EQUAL(variable_types[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(variable_types[1], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 0u);
@@ -1627,7 +1773,7 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // A valid improving ray rules out an infeasibility certificate
         // for the current basis; feasibility is not yet established.
         ARIADNE_TESTING_PROVE(is_indeterminate(solver.verify_feasibility(
-            lower,upper,A,rhs,variable_types)));
+            lower, upper, A, rhs, variable_types)));
     }
 
     Void test_validated_feasibility_stationary_at_boundary() {
@@ -1636,63 +1782,75 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // No strictly improving pivot exists, although this basis
         // cannot certify strict feasibility at the boundary.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x}},dp);
-        Vector<FloatDP> rhs({1.0_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({1.0_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x}, dp);
         Array<Slackness> variable_types(2u);
-        variable_types[0]=Slackness::BASIS;
-        variable_types[1]=Slackness::LOWER;
+        variable_types[0] = Slackness::BASIS;
+        variable_types[1] = Slackness::LOWER;
         Array<SizeType> permutation(2u);
-        permutation[0]=0u;
-        permutation[1]=1u;
+        permutation[0] = 0u;
+        permutation[1] = 1u;
 
         ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(
-            lower,upper,A,rhs,variable_types,permutation));
+            lower, upper, A, rhs, variable_types, permutation));
         ARIADNE_TESTING_EXPECT_EQUAL(variable_types[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(variable_types[1], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 1u);
         ARIADNE_TESTING_PROVE(is_indeterminate(solver.verify_feasibility(
-            lower,upper,A,rhs,variable_types)));
+            lower, upper, A, rhs, variable_types)));
     }
 
     Void test_validated_strict_feasibility() {
         // With x0+x1=1/2 and both variables in [0,1], the initial
         // basis gives x0=1/2, a strictly feasible basic variable.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({0.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({0.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
 
-        ARIADNE_TESTING_PROVE(definitely(solver.validated_feasible(xl,xu,A,b)));
+        ARIADNE_TESTING_PROVE(definitely(solver.validated_feasible(xl, xu, A, b)));
     }
 
     Void test_validated_reduced_cost_certificates() {
         // With x0+x1=b, a lower x1 cannot fix x0<0, and an upper
         // x1 cannot fix x0>1. The reduced costs exclude those directions.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x},dp);
-        Array<Slackness> types({Slackness::BASIS,Slackness::LOWER});
-        Array<SizeType> p({0u,1u});
-        Vector<FloatDP> below({-0.5_x},dp);
-        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(lower,upper,A,below,types,p));
-        ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(lower,upper,A,below,types)));
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x}, dp);
+        Array<Slackness> types({Slackness::BASIS, Slackness::LOWER});
+        Array<SizeType> p({0u, 1u});
+        Vector<FloatDP> below({-0.5_x}, dp);
+        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(lower, upper, A, below, types, p));
+        ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(lower, upper, A, below, types)));
 
-        types[1]=Slackness::UPPER;
-        Vector<FloatDP> above({3.0_x},dp);
-        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(lower,upper,A,above,types,p));
-        ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(lower,upper,A,above,types)));
+        types[1] = Slackness::UPPER;
+        Vector<FloatDP> above({3.0_x}, dp);
+        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(lower, upper, A, above, types, p));
+        ARIADNE_TESTING_PROVE(definitely(not solver.verify_feasibility(lower, upper, A, above, types)));
 
         // An unrelated upper variable has zero reduced cost. It cannot
         // improve the violated equality, but supplies no strict certificate.
-        Matrix<FloatDP> independent({{1.0_x,0.0_x}},dp);
-        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(lower,upper,independent,below,types,p));
+        Matrix<FloatDP> independent({
+                                        {1.0_x, 0.0_x}
+        },
+                                    dp);
+        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(lower, upper, independent, below, types, p));
         ARIADNE_TESTING_PROVE(is_indeterminate(
-            solver.verify_feasibility(lower,upper,independent,below,types)));
+            solver.verify_feasibility(lower, upper, independent, below, types)));
         ARIADNE_TESTING_EXPECT_EQUAL(types[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 0u);
@@ -1712,24 +1870,28 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // which it moves. That bound cannot block a positive step. The
         // other basic variable supplies the admissible blocking ratio.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,0.0_x,towards_upper ? -1.0_x : 1.0_x},
-                           {0.0_x,1.0_x,towards_upper ? -2.0_x : 2.0_x}},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 0.0_x, towards_upper ? -1.0_x : 1.0_x},
+                              {0.0_x, 1.0_x, towards_upper ? -2.0_x : 2.0_x}
+        },
+                          dp);
         Vector<FloatDP> rhs({towards_upper ? 1.5_x : -0.5_x,
-                              towards_upper ? -0.5_x : 1.5_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,1.0_x,2.0_x},dp);
-        Array<Slackness> types({Slackness::BASIS,Slackness::BASIS,Slackness::LOWER});
-        Array<SizeType> p({0u,1u,2u});
-        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(lower,upper,A,rhs,types,p));
+                             towards_upper ? -0.5_x : 1.5_x},
+                            dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 1.0_x, 2.0_x}, dp);
+        Array<Slackness> types({Slackness::BASIS, Slackness::BASIS, Slackness::LOWER});
+        Array<SizeType> p({0u, 1u, 2u});
+        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(lower, upper, A, rhs, types, p));
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 0u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 2u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[2], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], towards_upper ? Slackness::UPPER : Slackness::LOWER);
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
-        ARIADNE_TESTING_PROVE(definitely(primal[0]==FloatDPBounds(towards_upper ? 2.25_x : -1.25_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[1]==FloatDPBounds(towards_upper ? 1.0_x : 0.0_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[2]==FloatDPBounds(0.75_x,dp)));
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,rhs,primal));
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
+        ARIADNE_TESTING_PROVE(definitely(primal[0] == FloatDPBounds(towards_upper ? 2.25_x : -1.25_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[1] == FloatDPBounds(towards_upper ? 1.0_x : 0.0_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[2] == FloatDPBounds(0.75_x, dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, rhs, primal));
     }
 
     Void test_validated_feasibility_exchange_to_upper_bound() {
@@ -1738,57 +1900,63 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // increases x0 until x0 reaches UPPER; x1 must enter the basis.
         // This tests the positive d[r]*t branch of the validated pivot.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,-1.0_x}},dp);
-        Vector<FloatDP> rhs({-1.5_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({1.0_x,5.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, -1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({-1.5_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({1.0_x, 5.0_x}, dp);
         Array<Slackness> variable_types(2u);
-        variable_types[0]=Slackness::BASIS;
-        variable_types[1]=Slackness::LOWER;
+        variable_types[0] = Slackness::BASIS;
+        variable_types[1] = Slackness::LOWER;
         Array<SizeType> permutation(2u);
-        permutation[0]=0u;
-        permutation[1]=1u;
+        permutation[0] = 0u;
+        permutation[1] = 1u;
 
-        auto initial=solver.compute_x(lower,upper,A,rhs,variable_types);
-        ARIADNE_TESTING_PROVE(definitely(initial[0]==FloatDPBounds(-1.5_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(initial[1]==FloatDPBounds(0.0_x,dp)));
+        auto initial = solver.compute_x(lower, upper, A, rhs, variable_types);
+        ARIADNE_TESTING_PROVE(definitely(initial[0] == FloatDPBounds(-1.5_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(initial[1] == FloatDPBounds(0.0_x, dp)));
 
         ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(
-            lower,upper,A,rhs,variable_types,permutation));
+            lower, upper, A, rhs, variable_types, permutation));
         ARIADNE_TESTING_EXPECT_EQUAL(variable_types[0], Slackness::UPPER);
         ARIADNE_TESTING_EXPECT_EQUAL(variable_types[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 0u);
 
-        auto feasible_point=solver.compute_x(lower,upper,A,rhs,variable_types);
+        auto feasible_point = solver.compute_x(lower, upper, A, rhs, variable_types);
         ARIADNE_TESTING_PROVE(definitely(
-            feasible_point[0]==FloatDPBounds(1.0_x,dp)));
+            feasible_point[0] == FloatDPBounds(1.0_x, dp)));
         ARIADNE_TESTING_PROVE(definitely(
-            feasible_point[1]==FloatDPBounds(2.5_x,dp)));
+            feasible_point[1] == FloatDPBounds(2.5_x, dp)));
         ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(
-            lower,upper,A,rhs,variable_types,permutation));
+            lower, upper, A, rhs, variable_types, permutation));
         ARIADNE_TESTING_PROVE(definitely(solver.verify_feasibility(
-            lower,upper,A,rhs,variable_types)));
+            lower, upper, A, rhs, variable_types)));
     }
 
     Void test_validated_feasibility_basis_exchange() {
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,2.0_x}},dp);
-        Vector<FloatDP> b({1.5_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 2.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.5_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::LOWER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::LOWER;
         Array<SizeType> p(2u);
-        p[0]=0u;
-        p[1]=1u;
-        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl,xu,A,b,vt,p));
+        p[0] = 0u;
+        p[1] = 1u;
+        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl, xu, A, b, vt, p));
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(p[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(p[1], 0u);
-        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl,xu,A,b,vt,p));
+        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl, xu, A, b, vt, p));
     }
 
     Void test_validated_feasibility_bound_flip() {
@@ -1796,22 +1964,25 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // Moving the nonbasic x1 from LOWER to UPPER leaves x0=0.25,
         // strictly inside [0,1]. No basis exchange is needed.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.25_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.25_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
         Array<Slackness> vt(2u);
-        vt[0]=Slackness::BASIS;
-        vt[1]=Slackness::LOWER;
+        vt[0] = Slackness::BASIS;
+        vt[1] = Slackness::LOWER;
         Array<SizeType> p(2u);
-        p[0]=0u;
-        p[1]=1u;
+        p[0] = 0u;
+        p[1] = 1u;
 
-        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl,xu,A,b,vt,p));
+        ARIADNE_TESTING_PROVE(!solver.validated_feasibility_step(xl, xu, A, b, vt, p));
         ARIADNE_TESTING_EXPECT_EQUAL(vt[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(vt[1], Slackness::UPPER);
-        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl,xu,A,b,vt,p));
-        ARIADNE_TESTING_PROVE(definitely(solver.validated_feasible(xl,xu,A,b)));
+        ARIADNE_TESTING_PROVE(solver.validated_feasibility_step(xl, xu, A, b, vt, p));
+        ARIADNE_TESTING_PROVE(definitely(solver.validated_feasible(xl, xu, A, b)));
     }
 
     Void test_rounded_simplex_hotstarted_paths() {
@@ -1821,30 +1992,33 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // exercise the RoundedFloatDP hotstart instantiation rather
         // than relying on the FloatDP tests of the same interfaces.
         LinearSimplexSolver<RoundedFloatDP> solver;
-        Matrix<RoundedFloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<RoundedFloatDP> rhs({0.5_x},dp);
-        Vector<RoundedFloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<RoundedFloatDP> upper({1.0_x,1.0_x},dp);
-        Vector<RoundedFloatDP> costs({2.0_x,1.0_x},dp);
+        Matrix<RoundedFloatDP> A({
+                                     {1.0_x, 1.0_x}
+        },
+                                 dp);
+        Vector<RoundedFloatDP> rhs({0.5_x}, dp);
+        Vector<RoundedFloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<RoundedFloatDP> upper({1.0_x, 1.0_x}, dp);
+        Vector<RoundedFloatDP> costs({2.0_x, 1.0_x}, dp);
 
         Array<Slackness> feasibility_basis(2u);
-        feasibility_basis[0]=Slackness::BASIS;
-        feasibility_basis[1]=Slackness::LOWER;
+        feasibility_basis[0] = Slackness::BASIS;
+        feasibility_basis[1] = Slackness::LOWER;
         ARIADNE_TESTING_PROVE(definitely(solver.hotstarted_feasible(
-            lower,upper,A,rhs,feasibility_basis)));
+            lower, upper, A, rhs, feasibility_basis)));
         ARIADNE_TESTING_EXPECT_EQUAL(feasibility_basis[0], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(feasibility_basis[1], Slackness::LOWER);
 
         Array<Slackness> optimisation_basis(2u);
-        optimisation_basis[0]=Slackness::BASIS;
-        optimisation_basis[1]=Slackness::LOWER;
-        auto optimum=solver.hotstarted_minimise(
-            costs,lower,upper,A,rhs,optimisation_basis);
+        optimisation_basis[0] = Slackness::BASIS;
+        optimisation_basis[1] = Slackness::LOWER;
+        auto optimum = solver.hotstarted_minimise(
+            costs, lower, upper, A, rhs, optimisation_basis);
         ARIADNE_TESTING_EXPECT_EQUAL(optimum.size(), 2u);
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,rhs,optimum));
-        ARIADNE_TESTING_PROVE(decide(optimum[0]<RoundedFloatDP(0.125_x,dp)));
-        ARIADNE_TESTING_PROVE(decide(optimum[1]>RoundedFloatDP(0.375_x,dp)));
-        ARIADNE_TESTING_PROVE(decide(optimum[1]<RoundedFloatDP(0.625_x,dp)));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, rhs, optimum));
+        ARIADNE_TESTING_PROVE(decide(optimum[0] < RoundedFloatDP(0.125_x, dp)));
+        ARIADNE_TESTING_PROVE(decide(optimum[1] > RoundedFloatDP(0.375_x, dp)));
+        ARIADNE_TESTING_PROVE(decide(optimum[1] < RoundedFloatDP(0.625_x, dp)));
     }
 
     Void test_rounded_simplex_feasibility_and_optimum() {
@@ -1853,24 +2027,27 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // On x0+x1=1 in [0,1]^2, minimising 2*x0+x1 must select
         // x0=0, x1=1 rather than the initial vertex (1,0).
         LinearSimplexSolver<RoundedFloatDP> solver;
-        Matrix<RoundedFloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<RoundedFloatDP> rhs({1.0_x},dp);
-        Vector<RoundedFloatDP> lower({0.0_x,0.0_x},dp);
-        Vector<RoundedFloatDP> upper({1.0_x,1.0_x},dp);
-        Vector<RoundedFloatDP> costs({2.0_x,1.0_x},dp);
+        Matrix<RoundedFloatDP> A({
+                                     {1.0_x, 1.0_x}
+        },
+                                 dp);
+        Vector<RoundedFloatDP> rhs({1.0_x}, dp);
+        Vector<RoundedFloatDP> lower({0.0_x, 0.0_x}, dp);
+        Vector<RoundedFloatDP> upper({1.0_x, 1.0_x}, dp);
+        Vector<RoundedFloatDP> costs({2.0_x, 1.0_x}, dp);
 
-        ARIADNE_TESTING_PROVE(definitely(solver.feasible(lower,upper,A,rhs)));
-        auto optimum=solver.minimise(costs,lower,upper,A,rhs);
+        ARIADNE_TESTING_PROVE(definitely(solver.feasible(lower, upper, A, rhs)));
+        auto optimum = solver.minimise(costs, lower, upper, A, rhs);
         ARIADNE_TESTING_EXPECT_EQUAL(optimum.size(), 2u);
-        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A,rhs,optimum));
+        ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(A, rhs, optimum));
 
         // RoundedFloatDP comparisons are ApproximateKleenean, not
         // validated comparisons. Decide them rather than using
         // definitely(), which does not certify an approximate result.
         // The unique optimum is (0,1), not the initial vertex (1,0).
-        ARIADNE_TESTING_PROVE(decide(optimum[0]<RoundedFloatDP(0.25_x,dp)));
-        ARIADNE_TESTING_PROVE(decide(optimum[1]>RoundedFloatDP(0.75_x,dp)));
-        ARIADNE_TESTING_PROVE(decide(optimum[0]<optimum[1]));
+        ARIADNE_TESTING_PROVE(decide(optimum[0] < RoundedFloatDP(0.25_x, dp)));
+        ARIADNE_TESTING_PROVE(decide(optimum[1] > RoundedFloatDP(0.75_x, dp)));
+        ARIADNE_TESTING_PROVE(decide(optimum[0] < optimum[1]));
     }
 
     Void test_bland_rule_with_reordered_nonbasic_variables() {
@@ -1878,26 +2055,29 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // ORIGINAL index, even when it appears later in the permutation.
         // Both x1 and x2 reduce 2*x0+x1+x2, but p=[0,2,1] puts x2 first.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x,1.0_x}},dp);
-        Vector<FloatDP> rhs({1.0_x},dp);
-        Vector<FloatDP> costs({2.0_x,1.0_x,1.0_x},dp);
-        Vector<FloatDP> lower({0.0_x,0.0_x,0.0_x},dp);
-        Vector<FloatDP> upper({2.0_x,2.0_x,2.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> rhs({1.0_x}, dp);
+        Vector<FloatDP> costs({2.0_x, 1.0_x, 1.0_x}, dp);
+        Vector<FloatDP> lower({0.0_x, 0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> upper({2.0_x, 2.0_x, 2.0_x}, dp);
         Array<Slackness> types(3u);
-        types[0]=Slackness::BASIS;
-        types[1]=Slackness::LOWER;
-        types[2]=Slackness::LOWER;
+        types[0] = Slackness::BASIS;
+        types[1] = Slackness::LOWER;
+        types[2] = Slackness::LOWER;
         Array<SizeType> permutation(3u);
-        permutation[0]=0u;
-        permutation[1]=2u;
-        permutation[2]=1u;
-        Matrix<FloatDPBounds> inverse_basis=Matrix<FloatDPBounds>::identity(1u,dp);
-        auto primal=solver.compute_x(lower,upper,A,rhs,types);
+        permutation[0] = 0u;
+        permutation[1] = 2u;
+        permutation[2] = 1u;
+        Matrix<FloatDPBounds> inverse_basis = Matrix<FloatDPBounds>::identity(1u, dp);
+        auto primal = solver.compute_x(lower, upper, A, rhs, types);
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,types,permutation,inverse_basis,primal));
+            lower, upper, A, rhs, types, permutation, inverse_basis, primal));
 
         ARIADNE_TESTING_PROVE(!solver.lpstep(
-            costs,lower,upper,A,rhs,types,permutation,inverse_basis,primal));
+            costs, lower, upper, A, rhs, types, permutation, inverse_basis, primal));
         // x1 must enter, although it is in the LAST nonbasic position.
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[0], 1u);
         ARIADNE_TESTING_EXPECT_EQUAL(permutation[1], 2u);
@@ -1905,13 +2085,13 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         ARIADNE_TESTING_EXPECT_EQUAL(types[0], Slackness::LOWER);
         ARIADNE_TESTING_EXPECT_EQUAL(types[1], Slackness::BASIS);
         ARIADNE_TESTING_EXPECT_EQUAL(types[2], Slackness::LOWER);
-        ARIADNE_TESTING_PROVE(definitely(primal[0]<FloatDPBounds(0.25_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[1]>FloatDPBounds(0.75_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(primal[2]==FloatDPBounds(0.0_x,dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[0] < FloatDPBounds(0.25_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[1] > FloatDPBounds(0.75_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(primal[2] == FloatDPBounds(0.0_x, dp)));
         ARIADNE_TESTING_EXPECT_NO_THROW(solver.consistency_check(
-            lower,upper,A,rhs,types,permutation,inverse_basis,primal));
+            lower, upper, A, rhs, types, permutation, inverse_basis, primal));
         ARIADNE_TESTING_PROVE(solver.lpstep(
-            costs,lower,upper,A,rhs,types,permutation,inverse_basis,primal));
+            costs, lower, upper, A, rhs, types, permutation, inverse_basis, primal));
     }
 
     Void test_bland_rule_rejects_inconsistent_partition() {
@@ -1919,21 +2099,25 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         check_bland_rule_rejects_inconsistent_partition<FloatDP>();
     }
 
-    template<class X> Void check_bland_rule_rejects_inconsistent_partition() {
+    template<class X>
+    Void check_bland_rule_rejects_inconsistent_partition() {
         // The leading column describes a basis variable. Labelling all
         // variables LOWER violates that partition even though dimensions,
         // the permutation and inverse matrix are otherwise correct.
         LinearSimplexSolver<X> solver;
-        Matrix<X> A({{1.0_x,1.0_x}},dp);
-        Vector<X> rhs({0.5_x},dp);
-        Vector<X> costs({0.0_x,-1.0_x},dp);
-        Vector<X> lower({0.0_x,0.0_x},dp);
-        Vector<X> upper({1.0_x,1.0_x},dp);
-        Vector<RigorousNumericType<X>> primal({0.5_x,0.0_x},dp);
-        Array<Slackness> types({Slackness::LOWER,Slackness::LOWER});
-        Array<SizeType> p({0u,1u});
-        auto inverse=Matrix<RigorousNumericType<X>>::identity(1u,dp);
-        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.lpstep(costs,lower,upper,A,rhs,types,p,inverse,primal));
+        Matrix<X> A({
+                        {1.0_x, 1.0_x}
+        },
+                    dp);
+        Vector<X> rhs({0.5_x}, dp);
+        Vector<X> costs({0.0_x, -1.0_x}, dp);
+        Vector<X> lower({0.0_x, 0.0_x}, dp);
+        Vector<X> upper({1.0_x, 1.0_x}, dp);
+        Vector<RigorousNumericType<X>> primal({0.5_x, 0.0_x}, dp);
+        Array<Slackness> types({Slackness::LOWER, Slackness::LOWER});
+        Array<SizeType> p({0u, 1u});
+        auto inverse = Matrix<RigorousNumericType<X>>::identity(1u, dp);
+        ARIADNE_TESTING_EXPECT_EXCEPTION(solver.lpstep(costs, lower, upper, A, rhs, types, p, inverse, primal));
     }
 
     Void test_pivot_to_better_vertex() {
@@ -1941,24 +2125,26 @@ class TestLinearSimplexSolver : public Ariadne::Testing::ContextFixture
         // The default first-column basis starts at (1,0), whereas the
         // unique optimum (0,1) requires exchanging the basic variable.
         LinearSimplexSolver<FloatDP> solver;
-        Matrix<FloatDP> A({{1.0_x,1.0_x}},dp);
-        Vector<FloatDP> b({1.0_x},dp);
-        Vector<FloatDP> xl({0.0_x,0.0_x},dp);
-        Vector<FloatDP> xu({1.0_x,1.0_x},dp);
-        Vector<FloatDP> c({2.0_x,1.0_x},dp);
+        Matrix<FloatDP> A({
+                              {1.0_x, 1.0_x}
+        },
+                          dp);
+        Vector<FloatDP> b({1.0_x}, dp);
+        Vector<FloatDP> xl({0.0_x, 0.0_x}, dp);
+        Vector<FloatDP> xu({1.0_x, 1.0_x}, dp);
+        Vector<FloatDP> c({2.0_x, 1.0_x}, dp);
 
-        ARIADNE_TESTING_PROVE(definitely(solver.feasible(xl,xu,A,b)));
-        auto optimum=solver.minimise(c,xl,xu,A,b);
+        ARIADNE_TESTING_PROVE(definitely(solver.feasible(xl, xu, A, b)));
+        auto optimum = solver.minimise(c, xl, xu, A, b);
         ARIADNE_TESTING_EXPECT_EQUAL(optimum.size(), 2u);
-        ARIADNE_TESTING_PROVE(definitely(optimum[0]<FloatDPBounds(0.25_x,dp)));
-        ARIADNE_TESTING_PROVE(definitely(optimum[1]>FloatDPBounds(0.75_x,dp)));
+        ARIADNE_TESTING_PROVE(definitely(optimum[0] < FloatDPBounds(0.25_x, dp)));
+        ARIADNE_TESTING_PROVE(definitely(optimum[1] > FloatDPBounds(0.75_x, dp)));
         ARIADNE_TESTING_PROVE(definitely(
-            optimum[0]+optimum[1]==FloatDPBounds(1.0_x,dp)));
+            optimum[0] + optimum[1] == FloatDPBounds(1.0_x, dp)));
     }
 };
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     // Run the logging code for coverage without filling CTest output.
     // Redirect once for the lifetime of this standalone test executable;
     // muting would skip the LOGGING_PRINTLN formatting branches.

@@ -30,43 +30,64 @@
 #define ARIADNE_LINEAR_PROGRAMMING_HPP
 
 #include <stdexcept>
+
 #include "numeric/numeric.hpp"
 
 namespace Ariadne {
 
-template<class X> struct RigorousNumericsTraits { typedef X Type; };
-template<> struct RigorousNumericsTraits<FloatDP> { typedef Bounds<FloatDP> Type; };
-template<> struct RigorousNumericsTraits<FloatMP> { typedef Bounds<FloatMP> Type; };
-template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
+template<class X>
+struct RigorousNumericsTraits {
+    typedef X Type;
+};
+template<>
+struct RigorousNumericsTraits<FloatDP> {
+    typedef Bounds<FloatDP> Type;
+};
+template<>
+struct RigorousNumericsTraits<FloatMP> {
+    typedef Bounds<FloatMP> Type;
+};
+template<class X>
+using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
-template<class X> struct ApproximateNumericsTraits { typedef X Type; };
-template<> struct ApproximateNumericsTraits<FloatDP> { typedef Approximation<FloatDP> Type; };
-template<> struct ApproximateNumericsTraits<FloatMP> { typedef Approximation<FloatMP> Type; };
-template<class X> using ApproximateNumericType = typename ApproximateNumericsTraits<X>::Type;
+template<class X>
+struct ApproximateNumericsTraits {
+    typedef X Type;
+};
+template<>
+struct ApproximateNumericsTraits<FloatDP> {
+    typedef Approximation<FloatDP> Type;
+};
+template<>
+struct ApproximateNumericsTraits<FloatMP> {
+    typedef Approximation<FloatMP> Type;
+};
+template<class X>
+using ApproximateNumericType = typename ApproximateNumericsTraits<X>::Type;
 
 /** @brief Report degeneracy during a feasibility computation. */
 class DegenerateFeasibilityProblemException : public std::runtime_error {
   public:
     /** @brief Construct a degeneracy exception without a message. */
-    DegenerateFeasibilityProblemException() : std::runtime_error("") { }
+    DegenerateFeasibilityProblemException() : std::runtime_error("") {}
     /** @brief Construct a degeneracy exception with explanatory text. */
-    DegenerateFeasibilityProblemException(const StringType& what) : std::runtime_error(what) { }
+    DegenerateFeasibilityProblemException(const StringType& what) : std::runtime_error(what) {}
 };
 
 /** @brief Report a singular linear programming basis. */
 struct SingularLinearProgram : std::runtime_error {
     /** @brief Construct an error identifying a singular basis. */
-    SingularLinearProgram(const StringType& what) : std::runtime_error(what) { };
+    SingularLinearProgram(const StringType& what) : std::runtime_error(what) {};
 };
 /** @brief Report an unbounded linear programming problem. */
 struct UnboundedLinearProgram : std::runtime_error {
     /** @brief Construct an error identifying an unbounded objective. */
-    UnboundedLinearProgram(const StringType& what) : std::runtime_error(what) { }
+    UnboundedLinearProgram(const StringType& what) : std::runtime_error(what) {}
 };
 /** @brief Report an infeasible linear programming problem. */
 struct InfeasibleLinearProgram : std::runtime_error {
     /** @brief Construct an error identifying infeasibility. */
-    InfeasibleLinearProgram(const StringType& what) : std::runtime_error(what) { }
+    InfeasibleLinearProgram(const StringType& what) : std::runtime_error(what) {}
 };
 
 } // namespace Ariadne

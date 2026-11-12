@@ -29,10 +29,11 @@
 #ifndef ARIADNE_LINEAR_PROGRAMMING_LINEAR_PROGRAM_STATE_HPP
 #define ARIADNE_LINEAR_PROGRAMMING_LINEAR_PROGRAM_STATE_HPP
 
-#include "linear-programming/linear_simplex_algorithm.hpp"
-#include "utility/array.hpp"
-#include "algebra/vector.hpp"
 #include "algebra/matrix.hpp"
+#include "algebra/vector.hpp"
+#include "utility/array.hpp"
+
+#include "linear-programming/linear_simplex_algorithm.hpp"
 
 namespace Ariadne {
 
@@ -40,9 +41,9 @@ namespace Ariadne {
 template<class X, class XX>
 struct LinearProgram {
     /** @brief Construct an empty linear program state. */
-    LinearProgram() : LinearProgram(0u,0u,X(dp)) { }
+    LinearProgram() : LinearProgram(0u, 0u, X(dp)) {}
     /** @brief Initialize matrix and vector storage for a linear program. */
-    LinearProgram(SizeType m, SizeType n, X const& z);
+    LinearProgram(SizeType m, SizeType n, const X& z);
     Matrix<X> A;
     Vector<X> b;
     Vector<X> c;
@@ -56,10 +57,9 @@ struct LinearProgram {
     Vector<XX> z;
 };
 
-template<class X, class XX> LinearProgram<X,XX>::LinearProgram(SizeType m, SizeType n, X const& zero)
-    : A(m,n,zero), b(m,zero), c(n,zero), l(n,zero), u(n,zero)
-    , vt(n), p(n), B(m,m,zero)
-    , x(n,zero), y(m,zero),z(n,zero) { }
+template<class X, class XX>
+LinearProgram<X, XX>::LinearProgram(SizeType m, SizeType n, const X& zero)
+    : A(m, n, zero), b(m, zero), c(n, zero), l(n, zero), u(n, zero), vt(n), p(n), B(m, m, zero), x(n, zero), y(m, zero), z(n, zero) {}
 
 } // namespace Ariadne
 

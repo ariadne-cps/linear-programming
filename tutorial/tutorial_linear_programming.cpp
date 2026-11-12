@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <string>
+
 #include "ariadne-linear-programming.hpp"
 
 using namespace Ariadne;
@@ -56,7 +57,10 @@ int main() {
     Vector<FloatDP> objective({1.0_x, 2.0_x}, dp);
     Vector<FloatDP> lower({0.0_x, 0.0_x}, dp);
     Vector<FloatDP> upper({1.0_x, 1.0_x}, dp);
-    Matrix<FloatDP> equality_matrix({{1.0_x, 1.0_x}}, dp);
+    Matrix<FloatDP> equality_matrix({
+                                        {1.0_x, 1.0_x}
+    },
+                                    dp);
     Vector<FloatDP> equality_rhs({1.0_x}, dp);
 
     ValidatedKleenean lp_feasible =
@@ -77,7 +81,7 @@ int main() {
     show("Interior-point primal vector", std::get<1>(interior_result));
     show("Interior-point dual vector", std::get<2>(interior_result));
     show("Interior-point feasibility",
-        interior_point.feasible(lower,upper,equality_matrix,equality_rhs));
+         interior_point.feasible(lower, upper, equality_matrix, equality_rhs));
 
     return 0;
 }
