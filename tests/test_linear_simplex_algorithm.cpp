@@ -31,10 +31,10 @@
 #include "algebra/matrix.hpp"
 #include "algebra/vector.hpp"
 #include "logging/logging.hpp"
+#include "logging/test_runner.hpp"
 #include "numeric/numeric.hpp"
 
 #include "ariadne-testing.hpp"
-#include "logging/test_runner.hpp"
 #include "linear-programming/linear_programming.hpp"
 #include "linear-programming/linear_simplex_algorithm.hpp"
 
