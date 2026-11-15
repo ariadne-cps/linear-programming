@@ -36,6 +36,7 @@
 #include "numeric/numeric.hpp"
 
 #include "ariadne-testing.hpp"
+#include "logging/test_runner.hpp"
 #include "linear-programming/linear_interior_point_method.hpp"
 
 using namespace std;
@@ -547,5 +548,5 @@ int main(int argc, char** argv) {
     ARIADNE_TESTING_ADD_TEST(TestLinearInteriorPointSolver, test_mixed_bound_feasibility);
     ARIADNE_TESTING_ADD_TEST(TestLinearInteriorPointSolver, test_feasibility_iteration_limit);
     ARIADNE_TESTING_ADD_TEST(TestLinearInteriorPointSolver, test_constrained_feasibility);
-    return ARIADNE_TESTING_RUN_TESTS_WITH_ARGS(argc, argv);
+    return Ariadne::Testing::run_logging_suite(ariadne_test_suite, argc, argv);
 }

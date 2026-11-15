@@ -34,6 +34,7 @@
 #include "numeric/numeric.hpp"
 
 #include "ariadne-testing.hpp"
+#include "logging/test_runner.hpp"
 #include "linear-programming/linear_programming.hpp"
 #include "linear-programming/linear_simplex_algorithm.hpp"
 
@@ -2229,5 +2230,5 @@ int main(int argc, char** argv) {
     ARIADNE_TESTING_ADD_TEST(TestLinearSimplexSolver, test_compute_basis_rational_nonunit);
     ARIADNE_TESTING_ADD_TEST(TestLinearSimplexSolver, test_compute_basis_nonunit_two_by_two);
     ARIADNE_TESTING_ADD_TEST(TestLinearSimplexSolver, test_compute_basis_column_pivoting);
-    return ARIADNE_TESTING_RUN_TESTS_WITH_ARGS(argc, argv);
+    return Ariadne::Testing::run_logging_suite(ariadne_test_suite, argc, argv);
 }
